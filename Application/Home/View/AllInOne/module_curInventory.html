@@ -1,0 +1,172 @@
+<script type="text/javascript">
+$(document).ready(function() {
+    function getColModel_Id(){
+        return {name:'id',index:'id',
+            width:20,align:"right",
+            sortable:true,
+            editable:false,
+            readonly:true,
+            editoptions:{readonly:true,size:20},
+            formoptions:{rowpos:1, label: "id", elmprefix:"(*)"}
+        };
+    }
+    function getColModel_ReadOnly(indexname,rowpos,label,require,canSort){
+        return {
+            name:indexname,
+            index:indexname,
+            width:30,
+            align:"right",
+            sortable:(typeof(canSort )== "undefined") ? true : canSort,
+            editable:false,
+            readonly:true,
+            formoptions:{rowpos:rowpos, label: label, elmprefix:"(*)"}
+        };
+    }
+    function getColModel_ReadOnly_sumType(indexname,rowpos,label,require,canSort){
+        return {
+            name:indexname,
+            index:indexname,
+            width:30,
+            align:"right",
+            sortable:(typeof(canSort )== "undefined") ? true : canSort,
+            editable:false,
+            readonly:true,
+            formatter:'number',summaryType:'sum',
+            formoptions:{rowpos:rowpos, label: label, elmprefix:"(*)"}
+        };
+    }
+    function getColModel_comm_text(indexname,rowpos,label,require,canSort){
+        return {
+            name:indexname,
+            index:indexname,
+            width:20,
+            align:"right",
+            sortable:(typeof(canSort )== "undefined") ? true : canSort,
+            editable:true, edittype:"text",
+            editrules:{required: (typeof(require )== "undefined") ? true : require},
+            editoptions:{
+                size:"20"
+            },
+            formoptions:{rowpos:rowpos, label: label, elmprefix:"(*)"}
+        };
+    }
+    //job buy
+    function setCurInventoryJqGrid(domTableId,domPageId,cur_pro_id,cur_user_id,cur_dep_id){
+        var    caption_str = "库存管理";
+        var    search_url = '/index.php/Home/AllInOne/ajaxCurInventorySearch';
+        var    save_url = ''
+        var    colNames = ['ID','股票代码','账号','买入数量','买入金额','平均成本'];
+        //
+        var $cur_inventory_jgrid_obj = jQuery(domTableId).jqGrid({
+            url: search_url,
+            datatype: "json",
+            mtype: 'POST',
+            //height: 500,
+            postData: {pro_id:cur_pro_id},
+            colNames: colNames,
+            colModel:[
+                getColModel_Id(),
+                getColModel_comm_text("stock_code",2,"股票代码",true,true),
+                getColModel_comm_text("account",3,"账号",true,true),
+                getColModel_ReadOnly_sumType("cur_inventory_num",4,"买入数量",false,false),
+                getColModel_ReadOnly_sumType("cur_inventory_je",5,"买入金额",false,false),
+                getColModel_ReadOnly("cur_inventory_price",6,"平均成本",false,false)
+            ],
+            hiddengrid: false,
+            autowidth: true,
+            rownumbers: true,
+            rowNum:2000,
+            rowList:[2000],
+            pager: domPageId,
+            viewrecords: true,
+            sortorder: "desc",
+            forceFit : true,
+            editurl: save_url,
+            caption:caption_str,
+            footerrow : true,
+            //userDataOnFooter : true,
+            //altRows : true,
+            gridComplete: function() {
+                var rowNum = parseInt(jQuery(domTableId).jqGrid('getGridParam','records',10));
+                if(rowNum > 0){
+                    var cur_inventory_num  = jQuery(domTableId).jqGrid('getCol','cur_inventory_num',false,'sum');
+                    var cur_inventory_je  = jQuery(domTableId).jqGrid('getCol','cur_inventory_je',false,'sum');
+                    jQuery(domTableId).jqGrid('footerData',"set",{stock_code:'合计:',cur_inventory_num:cur_inventory_num,cur_inventory_je:cur_inventory_je});
+                }
+            },
+            sortname: 'id',
+            grouping:true,
+            //direction : "rtl",
+            groupingView : {
+                groupField : ['stock_code','account'],
+                groupColumnShow : [true,true]
+                //,groupText : ['<b>{0} - {1} Item(s)</b>']
+                ,groupText : ['<b>{0}       ({1})</b>                   当前金额<b>{cur_inventory_je}</b>       当前数量<b>{cur_inventory_num}</b>',
+                               '<b>{0}                ({1})</b>                              当前金额<b>{cur_inventory_je}</b>       当前数量<b>{cur_inventory_num}</b>']
+                ,groupCollapse : true
+                //,groupOrder: ['desc']
+                ,groupOrder: ['asc','asc']
+                ,groupSummary : [false,false]
+                ,showSummaryOnHide: false
+                ,groupDataSorted : true
+            }
+        });
+
+        //导航栏配置和CRUD函数
+        jQuery(domTableId).jqGrid('navGrid',domPageId,
+                {view:true,search:false,edit:false,add:false,del:false}
+        );
+
+        //其他配置
+        jQuery(domTableId).jqGrid('gridResize',{minWidth:1500,maxWidth:2000,minHeight:500, maxHeight:1000});
+        jQuery(domTableId).jqGrid('sortableRows');
+        jQuery(domTableId).jqGrid('filterToolbar');
+        if($(domPageId + ":contains(Toggle)").length < 1){
+            jQuery(domTableId).jqGrid('navButtonAdd',domPageId,{caption:"Toggle",title:"Toggle Search Toolbar", buttonicon :'ui-icon-pin-s',
+                onClickButton:function(){
+                    $cur_inventory_jgrid_obj[0].toggleToolbar();
+                }
+            });
+            //默认关闭 toggleToolbar
+            $cur_inventory_jgrid_obj[0].toggleToolbar();
+        }
+    }
+    setCurInventoryJqGrid("#curInventory","#pcurInventory",$("#pro_id").val(),$("#user_id").val(),$("#user_department").val());
+    //设置是否分组
+    jQuery("#curInventoryChnGroup").change(function(){
+        var vl = $(this).val();
+        if(vl) {
+            if(vl == "clear") {
+                jQuery("#curInventory").jqGrid('groupingRemove',true);
+            } else  if(vl == "stock_code_account") {
+                jQuery("#curInventory").jqGrid('groupingGroupBy',['stock_code','account']);
+            } else  if(vl == "account_stock_code") {
+                jQuery("#curInventory").jqGrid('groupingGroupBy',['account','stock_code']);
+            }else  if(vl == "account") {
+                jQuery("#curInventory").jqGrid('groupingGroupBy',['account']);
+            }else  if(vl == "stock_code") {
+                jQuery("#curInventory").jqGrid('groupingGroupBy',['stock_code']);
+            }
+        }
+    });
+});
+</script>
+<div id="module_curInventory"  class="module">
+    <h3><a href="#">项目当前库存管理</a></h3>
+    <div>
+        <span>
+            Group By:   <select id="curInventoryChnGroup">
+                            <option value="0">请选择</option>
+                            <option value="clear">Remove Grouping</option>
+                            <option value="account_stock_code">account_stock_code</option>
+                            <option value="stock_code_account">stock_code_account</option>
+                            <option value="account">account</option>
+                            <option value="stock_code">stock_code</option>
+                        </select>
+        </span>
+        <div>
+            <table id="curInventory"></table>
+            <div id="pcurInventory"></div>
+        </div>
+    </div>
+</div>

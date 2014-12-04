@@ -1,0 +1,562 @@
+<script type="text/javascript">
+$(document).ready(function() {
+    function getCanSellStockCodeAndNum(event){
+        var cur_id = event.target.id;
+        var $cur_sel = $("#" + cur_id);
+        var stock_code = $cur_sel.val();
+        var stock_code_num = 0;
+        var stock_code_price = 0.0;
+        console.log(stock_code);
+        if(0 != parseInt($cur_sel.val())){
+            //console.warn(cur_id);
+            //var cur_dwbj_id = cur_id.substring(0,cur_id.lastIndexOf("_")) + "_dwbj";
+            var pro_id = event.data.pro_id;
+            var ret = $.get("/index.php/Home/AllInOne/ajaxGetCanSellStockCodeAndNum?pro_id=" + pro_id, function(xhr){
+                console.log(xhr);
+                console.log(xhr.content);
+                var stock_array = xhr.content;
+                console.log(stock_array.length);
+                var i=0;
+                for(i=0;i<stock_array.length;i++){
+                    if(stock_code == stock_array[i].stock_code){
+                        console.log(stock_array[i].stock_code);
+                        console.log(stock_array[i].num);
+                        console.log(stock_array[i].price);
+                        stock_code_num = stock_array[i].num;
+                        stock_code_price = stock_array[i].price;
+                        //
+                        var $next =  $cur_sel.parent().next().next().next();
+                        console.log($next);
+                        console.log(stock_code_num);
+                        //$next.text(stock_code_num);
+                        var row_id = cur_id.split("_")[0];
+                        var $cur_can_sell_num = null;
+                        if(row_id == "new"){
+                            $cur_can_sell_num = $("#new_row_cur_can_sell_num");
+                        }else{
+                            $cur_can_sell_num = $("#" + row_id + "_cur_can_sell_num");
+                        }
+                        $cur_can_sell_num.val(stock_code_num);
+                        $cur_can_sell_num.attr("disabled",true);
+                        $cur_can_sell_num.attr("readonly",true);
+                        break;
+                    }
+                }
+                //
+            });
+        }
+
+        //
+        var $cur_sel_text = $cur_sel.find('option:selected').text();
+        //alert($cur_sel.find('option:selected').text());
+        var $table = $cur_sel.parent().parent().parent().parent();
+        var table_id = $table.attr("id");
+        //alert(table_id);
+    }
+    function checkStockMarket(event){
+        var cur_id = event.target.id;
+        var $cur_sel = $("#" + cur_id);
+        var $cur_sel_text = $cur_sel.find('option:selected').text();
+        //alert($cur_sel.val());
+        //alert($cur_sel.find('option:selected').text());
+        var $table = $cur_sel.parent().parent().parent().parent();
+        var table_id = $table.attr("id");
+        //alert(table_id);
+    }
+    function calcPercentNum(event){
+        var cur_id = event.target.id;
+        var $cur_sel = $("#" + cur_id);
+        var $cur_sel_text = $cur_sel.find('option:selected').text();
+        //alert($cur_sel.val());
+        //alert($cur_sel.find('option:selected').text());
+        var $prev =  $cur_sel.parent().prev();
+        var $next =  $cur_sel.parent().next();
+        //
+        var row_id = cur_id.split("_")[0];
+        var $cur_can_sell_num = null;
+        if(row_id == "new"){
+            $cur_can_sell_num = $("#new_row_cur_can_sell_num");
+        }else{
+            $cur_can_sell_num = $("#" + row_id + "_cur_can_sell_num");
+        }
+        console.group("calc percent num");
+        console.log($cur_can_sell_num.val());
+        console.log($cur_sel.val());
+        console.groupEnd();
+        $next.text(parseInt((parseFloat($cur_sel.val()) * parseFloat($cur_can_sell_num.val()))/100));
+    }
+    function get_status_opt_str(index){
+        var status_arr = {
+            '0':"全部",
+            '1':"新增",
+            '2':"启动",
+            '3':"暂停",
+            '4':"重新启动",
+            '5':"停止",
+            '6':"删除"
+        };
+        var str = "";
+        str += "<option value='0'>请选择</option>";
+        if(index == 0){
+            str += "<option value='1'>" + status_arr[1] + "</option>";
+        }else if(index == 1){
+            str += "<option value='1'>" + status_arr[1] + "</option>";
+            str += "<option value='2'>" + status_arr[2] + "</option>";
+            str += "<option value='6'>" + status_arr[6] + "</option>";
+        }else if(index == 2){
+            str += "<option value='2'>" + status_arr[2] + "</option>";
+            str += "<option value='3'>" + status_arr[3] + "</option>";
+            str += "<option value='5'>" + status_arr[5] + "</option>";
+        }else if(index == 3){
+            str += "<option value='3'>" + status_arr[3] + "</option>";
+            str += "<option value='4'>" + status_arr[4] + "</option>";
+            str += "<option value='5'>" + status_arr[5] + "</option>";
+        }else if(index == 4){
+            str += "<option value='3'>" + status_arr[3] + "</option>";
+            str += "<option value='4'>" + status_arr[4] + "</option>";
+            str += "<option value='5'>" + status_arr[5] + "</option>";
+        }else if(index == 5){
+            str += "<option value='5'>" + status_arr[5] + "</option>";
+        }else if(index == 6){
+            str += "<option value='6'>" + status_arr[6] + "</option>";
+        }
+        return str;
+    }
+    function chkValidStatus(event){
+        var cur_id = event.target.id;
+        var $cur_sel = $("#" + cur_id);
+        var index = $cur_sel.val();
+        var str = get_status_opt_str(index);
+        //alert(cur_id);
+        if(cur_id.indexOf("new_row") != -1){
+            var str = get_status_opt_str(index);
+            $("#new_row_status").empty();
+            $("#new_row_status").append(str);
+        }else{
+            var str = get_status_opt_str(index);
+            $("#" + cur_id).empty();
+            $("#" + cur_id).append(str);
+        }
+    }
+    function getColModel_Id(){
+        return {name:'id',index:'id',
+            width:20,align:"right",
+            sortable:true,
+            editable:false,
+            readonly:true,
+            editoptions:{readonly:true,size:20},
+            formoptions:{rowpos:1, label: "id", elmprefix:"(*)"}
+        };
+    }
+    function getColModel_ReadOnly(indexname,rowpos,label,require,canSort){
+        return {
+            name:indexname,
+            index:indexname,
+            width:30,
+            align:"right",
+            sortable:(typeof(canSort )== "undefined") ? true : canSort,
+            editable:false,
+            readonly:true,
+            formoptions:{rowpos:rowpos, label: label, elmprefix:"(*)"}
+        };
+    }
+    function getColModel_ReadOnly_sumType(indexname,rowpos,label,require,canSort){
+        return {
+            name:indexname,
+            index:indexname,
+            width:30,
+            align:"right",
+            sortable:(typeof(canSort )== "undefined") ? true : canSort,
+            editable:false,
+            readonly:true,
+            formatter:'number',summaryType:'sum',
+            formoptions:{rowpos:rowpos, label: label, elmprefix:"(*)"}
+        };
+    }
+    function getColModel_comm_text(indexname,rowpos,label,require,canSort,canEdit,isReadonly){
+        return {
+            name:indexname,
+            index:indexname,
+            width:20,
+            align:"right",
+            sortable:(typeof(canSort )== "undefined") ? true : canSort,
+            editable: (typeof(canEdit )== "undefined") ? true : canEdit,
+            readonly:(typeof(isReadonly )== "undefined") ? false : isReadonly,
+            edittype:"text",
+            editrules:{required: (typeof(require )== "undefined") ? true : require},
+            editoptions:{
+                size:"20"
+            },
+            formoptions:{rowpos:rowpos, label: label, elmprefix:"(*)"}
+        };
+    }
+    //job sell
+    function setJobSellJqGrid(domTableId,domPageId,cur_pro_id,cur_user_id,cur_dep_id,cur_zj_lock){
+        var    caption_str = "卖出管理";
+        var    search_url = '/index.php/Home/AllInOne/ajaxJobSellSearch';
+        var    save_url = '/index.php/Home/AllInOne/ajaxJobSellSave'
+        var    colNames = ['ID','股票代码','市场','价格','当前可卖出数量','卖出比例','预计卖出数量','实际卖出金额','实际卖出数量','状态','开始时间','结束时间'];
+        //
+        var $jobselljgridobj = jQuery(domTableId).jqGrid({
+            url: search_url,
+            datatype: "json",
+            mtype: 'POST',
+            //height: 500,
+            postData: {pro_id:cur_pro_id},
+            colNames: colNames,
+            colModel:[
+                getColModel_Id(),
+                {
+                    name: "stock_code",
+                    index: "stock_code",
+                    width:20,
+                    align:"right",
+                    sortable:true,
+                    stype:'select',//查询类型
+                    editable:true,edittype:"select",
+                    editoptions:{
+                        dataUrl : '/index.php/Home/AllInOne/ajaxGetCanSellStockCodeOnly?pro_id=' + cur_pro_id,
+                        value:{
+                            '0':'请选择'
+                        },
+                        defaultValue:"0",
+                        dataEvents: [
+                            {
+                                type: 'change', //change 下拉选择的时候
+                                data: {pro_id:cur_pro_id},
+                                fn: getCanSellStockCodeAndNum
+                            }
+                        ]
+                    },
+                    editrules:{required:true},
+                    formoptions:{ rowpos:2,label: "股票代码" ,elmprefix:"(*)"}
+                },
+                {
+                    name: "exchange_type",
+                    index: "exchange_type",
+                    width:20,
+                    align:"right",
+                    sortable:true,
+                    stype:'select',//查询类型
+                    editable:true,edittype:"select",
+                    editoptions:{
+                        value:{
+                            '0':'全部',
+                            '1':'上海A股',
+                            '2':'深圳A股'
+                        },
+                        defaultValue:"0",
+                        dataEvents: [
+                            {
+                                type: 'change', //change 下拉选择的时候
+                                fn: checkStockMarket
+                            }
+                        ]
+                    },
+                    editrules:{required:true},
+                    formoptions:{ rowpos:3,label: "市场" ,elmprefix:"(*)"}
+                },
+                getColModel_comm_text("price",4,"价格",true,true),
+                getColModel_comm_text("cur_can_sell_num",5,"当前可卖出数量",true,true,true,true),
+                {
+                    name: "percent",
+                    index: "percent",
+                    width:20,
+                    align:"right",
+                    sortable:true,
+                    stype:'select',//查询类型
+                    editable:true,edittype:"select",
+                    editoptions:{
+                        value:{
+                            '0':'0','1':'1','2':'2','3':'3','4':'4','5':'5','6':'6','7':'7','8':'8','9':'9','10':'10'
+                        },
+                        defaultValue:"0",
+                        dataEvents: [
+                            {
+                                type: 'change', //change 下拉选择的时候
+                                data: {},
+                                fn: calcPercentNum
+                            }
+                        ]
+                    },
+                    editrules:{required:true},
+                    sorttype:'int',summaryType:'count', summaryTpl : '({0}) total',
+                    formoptions:{ rowpos:6,label: "卖出比例" ,elmprefix:"(*)"}
+                },
+                getColModel_ReadOnly_sumType("yj_sell_num",7,"预计卖出数量",false,false),
+                getColModel_ReadOnly_sumType("sj_sell_je",8,"实际卖出金额",false,false),
+                getColModel_ReadOnly_sumType("sj_sell_num",9,"实际卖出数量",false,false),
+                {name:'status',index:'status',
+                    width:20, align:"center",
+                    sortable:true,
+                    stype:'select',//查询类型
+                    editable:true,edittype:"select",
+                    editoptions:{
+                        value:{
+                            '0':"全部",
+                            '1':"新增",
+                            '2':"启动",
+                            '3':"暂停",
+                            '4':"重新启动",
+                            '5':"停止",
+                            '6':"删除"
+                        },
+                        defaultValue:"0",
+                        dataEvents: [
+                            {
+                                type: 'focus', //change 下拉选择的时候
+                                data: {},
+                                fn: chkValidStatus
+                            }
+                        ]
+                    },
+                    editrules:{required:true},
+                    formoptions:{ rowpos:10,label: "状态",elmprefix:"(*)"}
+                },
+                getColModel_ReadOnly("job_ks_time",11,"开始日期",false,false),
+                getColModel_ReadOnly("job_js_time",12,"结束日期",false,false)
+            ],
+            hiddengrid: false,
+            autowidth: true,
+            rownumbers: true,
+            rowNum:20,
+            rowList:[20,30,50],
+            pager: domPageId,
+            viewrecords: true,
+            sortorder: "desc",
+            forceFit : true,
+            editurl: save_url,
+            caption:caption_str,
+            footerrow : true,
+            //userDataOnFooter : true,
+            //altRows : true,
+            gridComplete: function() {
+                var rowNum = parseInt(jQuery(domTableId).jqGrid('getGridParam','records',10));
+                if(rowNum > 0){
+                    var yj_sell_num  = jQuery(domTableId).jqGrid('getCol','yj_sell_num',false,'sum');
+                    var sj_sell_je  = jQuery(domTableId).jqGrid('getCol','sj_sell_je',false,'sum');
+                    var sj_sell_num  = jQuery(domTableId).jqGrid('getCol','sj_sell_num',false,'sum');
+                    jQuery(domTableId).jqGrid('footerData',"set",{percent:'合计:',yj_sell_num:yj_sell_num,sj_sell_je:sj_sell_je,sj_sell_num:sj_sell_num});
+                }
+            },
+            onSelectRow: function(id){
+            },
+            onCellSelect: function(){
+                //alert("cellselect");
+            },
+            afterInsertRow:function(rowid,rowdata,rowelem){
+                //alert(rowid);
+            },
+            sortname: 'status',
+            grouping:true,
+            //direction : "rtl",
+            groupingView : {
+                groupField : ['status','stock_code'],
+                groupColumnShow : [true,true]
+                //,groupText : ['<b>{0} - {1} Item(s)</b>']
+                ,groupText : ['<b>{0}        ({1})</b>                   预计卖出数量<b>{yj_sell_num}</b>      实际卖出金额<b>{sj_sell_je}</b>       实际卖出数量<b>{sj_sell_num}</b>',
+                               '<b>{0}                 ({1})</b>                              预计卖出数量<b>{yj_sell_num}</b>      实际卖出金额<b>{sj_sell_je}</b>       实际卖出数量<b>{sj_sell_num}</b>']
+                ,groupCollapse : true
+                //,groupOrder: ['desc']
+                ,groupOrder: ['asc','asc']
+                ,groupSummary : [false,false]
+                ,showSummaryOnHide: false
+                ,groupDataSorted : true
+            }
+            ,subGrid: true,
+            // define the icons in subgrid
+            subGridOptions: {
+                "plusicon"  : "ui-icon-triangle-1-e",
+                "minusicon" : "ui-icon-triangle-1-s",
+                "openicon"  : "ui-icon-arrowreturn-1-e"
+                //expand all rows on load
+                //,"expandOnLoad" : true
+                // load the subgrid data only once
+                // and the just show/hide
+                ,"reloadOnExpand" : true
+                // select the row when the expand column is clicked
+                ,"selectOnExpand" : true
+            },
+            subGridRowExpanded: function(subgrid_id, row_id) {
+                var subgrid_table_id, pager_id;
+                subgrid_table_id = subgrid_id+"_t";
+                pager_id = "p_"+subgrid_table_id;
+                $("#"+subgrid_id).html("<table id='"+subgrid_table_id+"' class='scroll'></table><div id='"+pager_id+"' class='scroll'></div>");
+                jQuery("#"+subgrid_table_id).jqGrid({
+                    //url:"/index.php/Home/AllInOne/ajaxJobSellSearch"+row_id,
+                    url:"/index.php/Home/AllInOne/ajaxJobSellDetailSearch",
+                    datatype: "json",
+                    mtype: 'POST',
+                    postData: {job_id:row_id},
+                    colNames: ['MsgId','账号','预计购买数量','实际购买数量','成交价格'],
+                    colModel: [
+                        {name:"MsgId",index:"MsgId",width:80,key:true},
+                        {name:"account",index:"account",width:130},
+                        {name:"yj_sell_num",index:"yj_sell_num",width:130,align:"right",formatter:'number',summaryType:'sum'},
+                        {name:"sj_sell_num",index:"sj_sell_num",width:130,align:"right",formatter:'number',summaryType:'sum'},
+                        {name:"sj_sell_price",index:"sj_sell_price",width:130,align:"right",sortable:false,formatter:'number',summaryType:'sum'}
+                    ],
+                    rowNum:20,
+                    pager: pager_id,
+                    sortname: 'num',
+                    sortorder: "asc",
+                    height: '100%'
+                });
+            }
+        });
+
+        //导航栏配置和CRUD函数
+        jQuery(domTableId).jqGrid('navGrid',domPageId,
+                {view:true,search:false,edit:false,add:false,del:false}
+        );
+        //
+        var addparameters = {
+            rowID : "new_row",
+            initdata : {},
+            position :"first",
+            useDefValues : false,
+            useFormatter : false,
+            addRowParams : {
+                extraparam:{pro_id:cur_pro_id,user_id:cur_user_id},
+                successfunc : function(xhr){
+                    console.log(xhr);
+                    var result = eval('(' + xhr.responseText + ')');
+                    if(true == result.state){
+                        jQuery(domTableId).trigger("reloadGrid");
+                        return true;
+                    }else{
+                        jAlert(result.msg);
+                        jQuery(domTableId).trigger("reloadGrid");
+                        return true;
+                    }
+                }
+            }
+        }
+        //
+        var editparameters = {
+            "keys" : false,
+            "oneditfunc" : function(rowid){
+                //alert(rowid);
+                var cur_status = $("#" + rowid + "_status").val();
+                //console.log(cur_status);
+                //alert(cur_status);
+                if(parseInt(cur_status) > 1){
+                    var $cur_item = $("#jobsell :input" );
+                    $cur_item.each(function(index,elem){
+                        //alert(elem);
+                        console.log(elem);
+                        var $cur_sel = $(elem);
+                        var cur_name = $cur_sel.attr("name");
+                        //alert(cur_name);
+                        console.log("elem=" + $cur_sel);
+                        console.log("cur_name=" + cur_name);
+                        console.log($.type(cur_name));
+                        if($.type(cur_name) != "undefined" && cur_name.indexOf("status") != -1){
+                            //cur status. can edit.
+                        }else{
+                            $cur_sel.attr("disabled",true);
+                            $cur_sel.attr("readonly",true);
+                        }
+                    });
+                }else{
+                    $("#" + rowid + "_cur_can_sell_num").attr("disabled",true);
+                    $("#" + rowid + "_cur_can_sell_num").attr("readonly",true);
+                }
+            },
+            "successfunc" : function(xhr){
+                var result = eval('(' + xhr.responseText + ')');
+                if(true == result.state){
+                    jQuery(domTableId).trigger("reloadGrid");
+                    return true;
+                }else{
+                    jAlert(result.msg);
+                    jQuery(domTableId).trigger("reloadGrid");
+                    return true;
+                }
+            },
+            "url" : null,
+            "extraparam" : {pro_id:cur_pro_id,user_id:cur_user_id},
+            "aftersavefunc" : null,
+            "errorfunc": null,
+            "afterrestorefunc" : null,
+            "restoreAfterError" : true,
+            "mtype" : "POST"
+        }
+        var parameters = {
+            edit: true,
+            editicon: "ui-icon-pencil",
+            add: true,
+            addicon:"ui-icon-plus",
+            save: true,
+            saveicon:"ui-icon-disk",
+            cancel: true,
+            cancelicon:"ui-icon-cancel",
+            addParams : addparameters,
+            editParams : editparameters
+        }
+
+        if(parseInt(cur_zj_lock) == 2){
+            jQuery(domTableId).jqGrid('inlineNav',domPageId,parameters);
+        }
+        //其他配置
+        jQuery(domTableId).jqGrid('gridResize',{minWidth:1500,maxWidth:2000,minHeight:500, maxHeight:1000});
+        jQuery(domTableId).jqGrid('sortableRows');
+        jQuery(domTableId).jqGrid('filterToolbar');
+        if($(domPageId + ":contains(Toggle)").length < 1){
+            jQuery(domTableId).jqGrid('navButtonAdd',domPageId,{caption:"Toggle",title:"Toggle Search Toolbar", buttonicon :'ui-icon-pin-s',
+                onClickButton:function(){
+                    $jobselljgridobj[0].toggleToolbar();
+                }
+            });
+            //默认关闭 toggleToolbar
+            $jobselljgridobj[0].toggleToolbar();
+        }
+    }
+    setJobSellJqGrid("#jobsell","#pjobsell",$("#pro_id").val(),$("#user_id").val(),$("#user_department").val(),$("#zj_lock").val(),$("#pro_zjze").val());
+    //设置是否分组
+    jQuery("#jobsellChnGroup").change(function(){
+        var vl = $(this).val();
+        if(vl) {
+            if(vl == "clear") {
+                jQuery("#jobsell").jqGrid('groupingRemove',true);
+            } else  if(vl == "stock_code_status") {
+                jQuery("#jobsell").jqGrid('groupingGroupBy',['stock_code','status']);
+            } else  if(vl == "status_stock_code") {
+                jQuery("#jobsell").jqGrid('groupingGroupBy',['status','stock_code']);
+            }else  if(vl == "status") {
+                jQuery("#jobsell").jqGrid('groupingGroupBy',['status']);
+            }else  if(vl == "stock_code") {
+                jQuery("#jobsell").jqGrid('groupingGroupBy',['stock_code']);
+            }
+        }
+    });
+    //默认取消分组
+    jQuery("#jobsell").jqGrid('groupingRemove',true);
+    //add group header
+/*    jQuery("#jobsell").jqGrid('setGroupHeaders', {
+        useColSpanStyle: true,
+        groupHeaders:[
+            {startColumnName: 'yj_sell_je', numberOfColumns: 3, titleText: '<B>金额</B>'}
+        ]
+    });*/
+});
+</script>
+<div id="module_jobsell"  class="module">
+    <h3><a href="#">项目卖出管理</a></h3>
+    <div>
+        <span>
+            Group By:   <select id="jobsellChnGroup">
+                            <option value="0">请选择</option>
+                            <option value="clear">Remove Grouping</option>
+                            <option value="status_stock_code">status_stock_code</option>
+                            <option value="stock_code_status">stock_code_status</option>
+                            <option value="status">status</option>
+                            <option value="stock_code">stock_code</option>
+                        </select>
+        </span>
+        <div>
+            <table id="jobsell"></table>
+            <div id="pjobsell"></div>
+        </div>
+    </div>
+</div>

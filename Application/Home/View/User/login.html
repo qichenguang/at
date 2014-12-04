@@ -1,0 +1,65 @@
+<html lang="zh">
+<head>
+    <meta charset="utf-8">
+    <title></title>
+    <!--jquery  ui custom -->
+    <!--<script src="__PUBLIC__/js/Lib/jquery-1.11.0.js" type="text/javascript"></script>-->
+    <script src="__PUBLIC__/js/Lib/jquery-2.1.1.js" type="text/javascript"></script>
+    <script src="__PUBLIC__/js/Lib/jquery-migrate-1.2.1.js" type="text/javascript"></script>
+    <!--jquery validate lib-->
+    <script src="__PUBLIC__/js/Lib/validate/jquery.validate.js" type="text/javascript"></script>
+    <!-- <script src="__PUBLIC__/js/Lib/validate/additional-methods.js" type="text/javascript"></script>-->
+    <script src="__PUBLIC__/js/Lib/validate/messages_zh.js" type="text/javascript"></script>
+    <!--jquery lib-->
+    <script src="__PUBLIC__/js/Lib/jquery.form.js" type="text/javascript"></script>
+    <!--<script src="__PUBLIC__/js/Lib/leanmodal/jquery.leanModal.min.js" type="text/javascript"></script>-->
+    <script src="__PUBLIC__/js/Lib/simplemodal/jquery.simplemodal-1.4.4.js" type="text/javascript"></script>
+    <script src="__PUBLIC__/js/user.js"></script>
+
+
+<!--    <link type='text/css' href='__PUBLIC__/style/simplemodal/basic.css' rel='stylesheet' media='screen' />-->
+    <link rel="stylesheet" href="__PUBLIC__/style/base.css" type="text/css" />
+</head>
+<body>
+
+<div id="userLoginMain">
+    <FORM id="userLoginForm" method="post" action="__URL__/logon">
+        Email 作为登录用户名：<em>*</em><input type="text"  id="email" name="email"  /><br/>
+        登录密码：<em>*</em><input type="password"  id="password" name="password" value="111111" /><br/>
+        部门：
+        <select name="department" id="department">
+            <foreach name="department_array" item="vo" >
+                <option value="{$vo.id}">{$vo.name}</option>
+            </foreach>
+        </select>
+        <br/>
+        主题：
+        <select name="theme" id="theme">
+            <option value="redmond">redmond</option>
+            <option value="swanky-purse">swanky-purse</option>
+            <option value="smoothness">smoothness</option>
+            <option value="start">start</option>
+            <option value="le-frog">le-frog</option>
+        </select>
+        <br/>
+        <INPUT type="submit" value="提交">
+    </FORM>
+
+<!--    <select name="cityid">
+        <optgroup label=''></optgroup><optgroup label='安徽'><option value='40'>合肥</option><option value='43'>马鞍山</option><option value='48'>芜湖</option><option value='25'>淮南</option><option value='22'>蚌埠</option><option value='19'>阜阳</option><option value='69'>黄山</option><option value='68'>安庆</option><option value='65'>池州</option><option value='61'>铜陵</option><option value='51'>宣城</option><option value='36'>六安</option><option value='6'>亳州</option><option value='4'>淮北</option><option value='39'>巢湖</option><option value='32'>滁州</option></optgroup><optgroup label='北京'><option value='2419'>北京</option></optgroup><optgroup label='重庆'><option value='2418'>重庆</option></optgroup><optgroup label='福建'><option value='171'>福州</option><option value='196'>厦门</option><option value='191'>泉州</option><option value='200'>漳州</option><option value='185'>龙岩</option><option value='159'>宁德</option><option value='141'>武夷山</option></optgroup><optgroup label='广东'><option value='2422'>广州</option><option value='372'>深圳</option><option value='354'>佛山</option><option value='322'>东莞</option><option value='392'>珠海</option><option value='375'>中山</option><option value='374'>江门</option><option value='361'>肇庆</option><option value='358'>惠州</option><option value='389'>湛江</option><option value='386'>茂名</option><option value='353'>汕头</option><option value='351'>潮州</option><option value='342'>梅州</option><option value='330'>韶关</option><option value='307'>清远</option><option value='306'>河源</option><option value='311'>花都</option><option value='305'>从化</option><option value='370'>汕尾</option><option value='312'>揭阳</option><option value='324'>阳江</option><option value='310'>增城</option><option value='440113'>番禺</option><option value='440606'>顺德</option></optgroup><optgroup label='贵州'><option value='519'>贵阳</option><option value='560'>遵义</option><option value='536'>都匀</option><option value='534'>安顺</option><option value='526'>六盘水</option><option value='490'>仁怀</option><option value='483'>赤水</option></optgroup><optgroup label='甘肃'><option value='242'>兰州</option><option value='281'>天水</option><option value='210'>敦煌</option></optgroup><optgroup label='广西'><option value='462'>南宁</option><option value='407'>桂林</option><option value='427'>柳州</option><option value='475'>北海</option><option value='465'>玉林</option></optgroup><optgroup label='河北'><option value='683'>石家庄</option><option value='627'>廊坊</option><option value='618'>唐山</option><option value='616'>秦皇岛</option><option value='596'>承德</option><option value='730'>邯郸</option><option value='696'>衡水</option><option value='661'>定州</option><option value='649'>保定</option><option value='628'>涿州</option><option value='617'>三河</option><option value='613'>迁安</option><option value='611'>遵化</option><option value='668'>沧州</option></optgroup><optgroup label='海南'><option value='562'>海口</option><option value='578'>三亚</option></optgroup><optgroup label='湖南'><option value='2351'>长沙</option><option value='2361'>株洲</option><option value='2332'>常德</option><option value='2325'>岳阳</option><option value='2408'>郴州</option><option value='2387'>衡阳</option><option value='2367'>怀化</option><option value='2362'>湘潭</option><option value='2360'>韶山</option><option value='2346'>浏阳</option><option value='2340'>益阳</option><option value='2329'>张家界</option></optgroup><optgroup label='湖北'><option value='975'>武汉</option><option value='970'>宜昌</option><option value='954'>襄樊</option><option value='1006'>黄石</option><option value='996'>鄂州</option><option value='992'>荆州</option><option value='969'>荆门</option><option value='949'>十堰</option></optgroup><optgroup label='黑龙江'><option value='795'>哈尔滨</option><option value='782'>大庆</option><option value='762'>齐齐哈尔</option><option value='815'>绥芬河</option><option value='813'>牡丹江</option><option value='797'>七台河</option><option value='781'>佳木斯</option><option value='748'>伊春</option><option value='743'>黑河</option><option value='810'>鸡西</option></optgroup><optgroup label=' 河南'><option value='852'>郑州</option><option value='865'>洛阳</option><option value='857'>开封</option><option value='836'>新乡</option><option value='942'>荥阳</option><option value='884'>汝州</option><option value='875'>登封</option><option value='870'>商丘</option><option value='869'>新郑</option><option value='840'>焦作</option><option value='829'>濮阳</option><option value='820'>安阳</option><option value='935'>信阳</option></optgroup><optgroup label='江苏'><option value='1059'>南京</option><option value='1082'>苏州</option><option value='1079'>无锡</option><option value='1085'>徐州</option><option value='1065'>镇江</option><option value='1071'>南通</option><option value='1061'>泰州</option><option value='1057' selected>扬州</option><option value='1037'>宿迁</option><option value='1046'>盐城</option><option value='1042'>淮安</option><option value='1026'>连云港</option><option value='1073'>常州</option><option value='1083'>昆山</option><option value='1081'>宜兴</option><option value='1077'>常熟</option><option value='1074'>张家港</option><option value='1072'>丹阳</option><option value='1075'>江阴</option></optgroup><optgroup label='吉林'><option value='1202'>长春</option><option value='1200'>吉林</option><option value='1230'>辽源</option><option value='1228'>集安</option><option value='1226'>通化</option><option value='1224'>临江</option><option value='1223'>白山</option><option value='1215'>梅河口</option><option value='1211'>延吉</option><option value='1198'>蛟河</option><option value='1195'>敦化</option><option value='1191'>德惠</option><option value='1182'>白城</option><option value='1212'>四平</option></optgroup><optgroup label='江西'><option value='1111'>南昌</option><option value='1170'>赣州</option><option value='1155'>吉安</option><option value='1122'>上饶</option><option value='1102'>景德镇</option><option value='1093'>九江</option><option value='1146'>萍乡</option></optgroup><optgroup label='辽宁'><option value='1242'>沈阳</option><option value='1288'>大连</option><option value='1269'>鞍山</option><option value='1268'>葫芦岛</option><option value='1267'>锦州</option><option value='1266'>盘锦</option><option value='1291'>铁岭</option><option value='1282'>丹东</option><option value='1278'>营口</option><option value='1270'>海城</option><option value='1263'>辽阳</option><option value='1258'>本溪</option><option value='1245'>抚顺</option><option value='1240'>新民</option></optgroup><optgroup label='宁夏'><option value='1388'>银川</option></optgroup><optgroup label='内蒙古'><option value='1365'>呼和浩特</option><option value='1380'>鄂尔多斯</option><option value='1372'>包头</option><option value='1341'>赤峰</option></optgroup><optgroup label='青海'><option value='1420'>西宁</option></optgroup><optgroup label='山西'><option value='1709'>太原</option><option value='1749'>临汾</option><option value='1673'>大同</option><option value='1777'>晋城</option><option value='1770'>运城</option><option value='1747'>长治</option><option value='1713'>吕梁</option><option value='1711'>晋中</option><option value='1677'>朔州</option></optgroup><optgroup label='山东'><option value='1591'>济南</option><option value='1605'>青岛</option><option value='1637'>临沂</option><option value='1630'>济宁</option><option value='1603'>泰安</option><option value='1600'>莱芜</option><option value='1588'>淄博</option><option value='1629'>日照</option><option value='1574'>潍坊</option><option value='1562'>东营</option><option value='1555'>威海</option><option value='1559'>德州</option><option value='1553'>烟台</option><option value='1640'>滕州</option><option value='1639'>枣庄</option><option value='1626'>兖州</option><option value='1622'>曲阜</option><option value='1571'>寿光</option><option value='1567'>文登</option><option value='1548'>乐陵</option><option value='1594'>聊城</option><option value='1634'>菏泽</option></optgroup><optgroup label='上海'><option value='2421'>上海</option></optgroup><optgroup label='四川'><option value='1840'>成都</option><option value='1934'>攀枝花</option><option value='1907'>宜宾</option><option value='1904'>泸州</option><option value='1884'>峨眉山</option><option value='1883'>乐山</option><option value='1838'>南充</option><option value='1811'>绵阳</option></optgroup><optgroup label='陕西'><option value='1494'>西安</option><option value='1527'>汉中</option><option value='1503'>咸阳</option><option value='1492'>宝鸡</option><option value='1490'>渭南</option><option value='1463'>延安</option><option value='1448'>榆林</option></optgroup><optgroup label='天津'><option value='2420'>天津</option><option value='120107'>塘沽区</option></optgroup><optgroup label='台湾'><option value='2423'>台北</option></optgroup><optgroup label='西藏'><option value='2093'>拉萨</option></optgroup><optgroup label='新疆'><option value='1990'>乌鲁木齐</option><option value='1965'>克拉玛依</option><option value='2047'>和田</option><option value='2031'>喀什</option><option value='1995'>吐鲁番</option><option value='1994'>哈密</option></optgroup><optgroup label='云南'><option value='2179'>昆明</option><option value='2228'>普洱</option><option value='2215'>瑞丽</option><option value='2203'>玉溪</option><option value='2170'>曲靖</option><option value='2160'>大理</option><option value='2139'>丽江</option></optgroup><optgroup label='浙江'><option value='2259'>杭州</option><option value='2308'>温州</option><option value='2297'>台州</option><option value='2286'>金华</option><option value='2268'>宁波</option><option value='2267'>绍兴</option><option value='2265'>舟山</option><option value='2249'>嘉兴</option><option value='2250'>湖州</option><option value='2284'>衢州</option><option value='2281'>东阳</option><option value='2278'>义乌</option><option value='2274'>建德</option><option value='2266'>富阳</option><option value='2258'>海宁</option><option value='2254'>桐乡</option></optgroup><option value='0'>其他</option>
+    </select>-->
+</div>
+
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#userLoginMain").modal();
+    });
+</script>
+
+</body>
+</html>
+
+
+

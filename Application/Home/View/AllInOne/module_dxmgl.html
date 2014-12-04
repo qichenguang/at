@@ -1,0 +1,388 @@
+<script type="text/javascript">
+    $(document).ready(function() {
+        function setSearchDate(dom,begflag){
+            var today = new Date();
+            var year = today.getFullYear();
+            var begin = year + "-01-01";
+            var end   = year + "-12-31";
+            var dateIt = begflag ? begin : end;
+            $("#" + dom).val(dateIt);
+            $("#" + dom).datepicker({
+                changeMonth: true,
+                changeYear: true,
+                dateFormat:"yy-mm-dd",
+                showButtonPanel: true,
+                defaultDate: dateIt
+            });
+        }
+        setSearchDate("zb_time_beg",true);
+        setSearchDate("zb_time_end",false);
+        setSearchDate("xmwg_khys_sj_time_beg",true);
+        setSearchDate("xmwg_khys_sj_time_end",false);
+        //
+        function checkSearchCondition(){
+            var fgs = $("#user_fgs").val();
+            if("A" != fgs){
+                $("#fgs").val("" + fgs);
+                //alert($("#fgs").val());
+                $("#fgs").attr("disabled",true);
+            }
+        }
+        checkSearchCondition();
+        //
+        function dxmsearch(){
+            jQuery("#dxmgl").jqGrid("setGridParam", { postData: getCurSearchParm() }).trigger("reloadGrid");
+            get_dxmgl_chart_need_data();
+        }
+        $("#butDxmsearch").on("click",dxmsearch);
+        //jqgrid begin--------------------------------------------------------------------------------------------------
+        function getColModel_CommId(){
+            return {name:'id',index:'id',
+                width:20,align:"right",
+                sortable:true,
+                editable:false,
+                readonly:true,
+                editoptions:{readonly:true,size:20},
+                formoptions:{rowpos:1, label: "id", elmprefix:"(*)"}
+            };
+        }
+        function getColModel_Comm(indexname,rowpos,label,require){
+            return {
+                name:indexname,
+                index:indexname,
+                width:20,
+                align:"right",
+                sortable:true,
+                editable:false, edittype:"text",
+                editrules:{required: (typeof(require )== "undefined") ? false : require},
+                editoptions:{
+                    size:"20"
+                },
+                formoptions:{rowpos:rowpos, label: label, elmprefix:"(*)"}
+            };
+        }
+        function setDxmSearchJqGrid(domTableId,domPageId,parm){
+            console.log(parm);
+            //----------------------------------------------------------------------------------------------------------
+            var  caption_str = "多项目查询";
+            var  search_url = '/index.php/Home/DbOpt/ajaxDxmSearch';
+            var  save_url = '';
+            var  colNames = ['ID','项目ID','项目名称','客户名称','项目类别','项目面积','合同金额','中标日期','完工日期','项目状态','分公司'];
+            //
+            var $dxmgridobj = jQuery(domTableId).jqGrid({
+                url: search_url,
+                datatype: "json",
+                mtype: 'POST',
+                postData: parm,
+                colNames: colNames,
+                colModel:[
+                    getColModel_CommId(),
+                    getColModel_Comm("pro_id",2,"项目ID"),
+                    getColModel_Comm("sc_pro_name",3,"项目名称"),
+                    getColModel_Comm("sc_cus_name",4,"客户名称"),
+                    getColModel_Comm("sc_pro_type",5,"项目类别"),
+                    getColModel_Comm("ys_xm_mj",6,"项目面积"),
+                    getColModel_Comm("ys_hetong_amt",7,"合同金额"),
+                    getColModel_Comm("sc_zb_time",8,"中标日期"),
+                    getColModel_Comm("gc_xmwg_khys_sj_time",9,"完工日期"),
+                    getColModel_Comm("xmstatus",10,"项目状态"),
+                    getColModel_Comm("fgs",11,"分公司")
+                ],
+                hiddengrid: false,
+                autowidth: true,
+                rownumbers: true,
+                rowNum:20,
+                rowList:[20,30,50,1000],
+                pager: domPageId,
+                viewrecords: true,
+                sortorder: "asc",
+                forceFit : true,
+                editurl: save_url,
+                caption:caption_str,
+                footerrow : true,
+                //userDataOnFooter : true,
+                //altRows : true,
+                gridComplete: function() {
+                    //alert("grid complete");
+                    var rowNum = parseInt(jQuery(domTableId).jqGrid('getGridParam','records',10));
+                    if(rowNum > 0){
+                        var xm_mj  = jQuery(domTableId).jqGrid('getCol','ys_xm_mj',false,'sum');
+                        var hetong_amt  = jQuery(domTableId).jqGrid('getCol','ys_hetong_amt',false,'sum');
+                        jQuery(domTableId).jqGrid('footerData',"set",{sc_invest_type:'合计:',ys_xm_mj:xm_mj,ys_hetong_amt:hetong_amt});
+                    }else{
+                        jQuery(domTableId).jqGrid('footerData',"set",{sc_invest_type:'合计:',ys_xm_mj:0,ys_hetong_amt:0});
+                    }
+                },
+                onSelectRow: function(id){
+                },
+                onCellSelect: function(){
+                    //alert("cellselect");
+                },
+                afterInsertRow:function(rowid,rowdata,rowelem){
+                    //alert(rowid);
+                }
+            });
+
+            //导航栏配置和CRUD函数
+            jQuery(domTableId).jqGrid('navGrid',domPageId,
+                    {view:true,search:false,edit:false,add:false,del:false}
+            );
+            //其他配置
+            jQuery(domTableId).jqGrid('gridResize',{minWidth:1500,maxWidth:2000,minHeight:500, maxHeight:1000});
+            jQuery(domTableId).jqGrid('sortableRows');
+        }
+        function getCurSearchParm(){
+            var fgs = $("#fgs").val();
+            var zb_flag = $("#zb_flag").val();
+            var zb_time_beg = $("#zb_time_beg").val();
+            var zb_time_end = $("#zb_time_end").val();
+            var xmwg_khys_sj_time_beg = $("#xmwg_khys_sj_time_beg").val();
+            var xmwg_khys_sj_time_end = $("#xmwg_khys_sj_time_end").val();
+            var cus_t_2 = $("#cus_t_2").val();
+            var invest_type = $("#invest_type").val();
+            var xm_mj_beg = $("#xm_mj_beg").val();
+            var xm_mj_end = $("#xm_mj_end").val();
+            var hetong_amt_beg = $("#hetong_amt_beg").val();
+            var hetong_amt_end = $("#hetong_amt_end").val();
+            var pro_trade_base = $("#pro_trade_base").val();
+            var parm = {
+                fgs                       : fgs,
+                sc_zb_flag               : zb_flag,
+                zb_time_beg              : zb_time_beg,
+                zb_time_end               : zb_time_end,
+                xmwg_khys_sj_time_beg   : xmwg_khys_sj_time_beg,
+                xmwg_khys_sj_time_end   : xmwg_khys_sj_time_end,
+                sc_cus_t_2               : cus_t_2,
+                sc_invest_type           : invest_type,
+                xm_mj_beg                : xm_mj_beg,
+                xm_mj_end                : xm_mj_end,
+                hetong_amt_beg            : hetong_amt_beg,
+                hetong_amt_end           : hetong_amt_end,
+                sc_pro_trade_base        : pro_trade_base
+            }
+            return parm;
+        }
+/*        var postData = $(gridId).jqGrid("getGridParam", "postData");
+        $.each(paras, function (k, v) {
+            delete postData[v.name];
+        });*/
+        setDxmSearchJqGrid("#dxmgl","#pdxmgl",getCurSearchParm());
+        get_dxmgl_chart_need_data();
+        //jqgrid end----------------------------------------------------------------------------------------------------
+        function get_dxmgl_chart_need_data(){
+            var ret = $.post("/index.php/Home/Fusion/ajaxGetDxmgl",getCurSearchParm(), function(xhr){
+                var dxmgl_1_Chart = new FusionCharts( "__PUBLIC__/js/Lib/FusionCharts/Charts/Pie2D.swf",// Pie2D.swf
+                        "dxmgl_1_ChartId", "700", "500", "0", "1" );
+                dxmgl_1_Chart.setJSONData({
+                    "chart":
+                    {
+                        "caption": "项目行业分布比例",
+                        "showlabels": "1",
+                        "showvalues": "1",
+                        "decimals": "0",
+                        "numberprefix": "",
+                        "placevaluesinside": "1",
+                        "rotatevalues": "1",
+                        "basefont":"Arial",
+                        "basefontsize":"15",
+                        "basefontcolor":"000000",
+                        //
+                        "showlegend":"1",
+                        "enablesmartlabels":"1",
+                        "showpercentvalues":"1"
+                    },
+                    "data" :xhr.hyfb
+                });
+                dxmgl_1_Chart.render("dxmgl_1_chartContainer");
+                //-------------------------------------------------------------------------------------------------------------
+                var dxmgl_2_Chart = new FusionCharts( "__PUBLIC__/js/Lib/FusionCharts/Charts/Pie2D.swf",// Pie2D.swf
+                        "dxmgl_2_ChartId", "700", "500", "0", "1" );
+                dxmgl_2_Chart.setJSONData({
+                    "chart":
+                    {
+                        "caption": "项目类别分布比例",
+                        "showlabels": "1",
+                        "showvalues": "1",
+                        "decimals": "0",
+                        "numberprefix": "",
+                        "placevaluesinside": "1",
+                        "rotatevalues": "1",
+                        "basefont":"Arial",
+                        "basefontsize":"15",
+                        "basefontcolor":"000000",
+                        //
+                        "showlegend":"1",
+                        "enablesmartlabels":"1",
+                        "showpercentvalues":"1"
+                    },
+                    "data" :xhr.lbfb
+                });
+                dxmgl_2_Chart.render("dxmgl_2_chartContainer");
+                //-------------------------------------------------------------------------------------------------------------
+            });
+            return ret;
+        }
+    });
+</script>
+<div id="module_dxmgl"  class="module">
+    <h3><a href="#">多项目管理</a></h3>
+    <div>
+        <div>
+            <!--<FORM id="dxmglForm" method="post" >-->
+            <table jb_table="bordered">
+                <tr>
+                    <td>项目实施分公司:</td>
+                    <td>
+                        <select id="fgs" name="fgs" >
+                            <option value="all" selected="selected">全部</option>
+                            <option value="A">北京公司</option>
+                            <option value="B">上海分公司</option>
+                            <option value="C">广深办事处</option>
+                            <option value="D">天津办事处</option>
+                            <option value="E">成都办事处</option>
+                            <option value="F">新加坡分公司</option>
+                            <option value="G">香港分公司</option>
+                        </select>
+                    </td>
+                    <td>中标状态:</td>
+                    <td>
+                        <select id="zb_flag" name="zb_flag">
+                            <option value="all" >全部</option>
+                            <option value="A">落标</option>
+                            <option value="B" selected="selected">中标</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>中标日期:</td>
+                    <td>
+                        从<INPUT type="text" id="zb_time_beg" name="zb_time_beg"/>
+                        至<INPUT type="text" id="zb_time_end" name="zb_time_end"/>
+                    </td>
+                    <td>实际完工日期:</td>
+                    <td>
+                        从<INPUT type="text" id="xmwg_khys_sj_time_beg" name="xmwg_khys_sj_time_beg"/>
+                        至<INPUT type="text" id="xmwg_khys_sj_time_end" name="xmwg_khys_sj_time_end"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td>客户类别2:</td>
+                    <td>
+                        <select id="cus_t_2" name="cus_t_2">
+                            <option value="all" selected="selected">全部</option>
+                            <option value="A">质量敏感性</option>
+                            <option value="B">成本敏感型</option>
+                            <option value="C">平衡性</option>
+                        </select>
+                    </td>
+                    <td>投标类别:</td>
+                    <td>
+                        <select id="invest_type" name="invest_type">
+                            <option value="all" selected="selected">全部</option>
+                            <option value="A">框架协议</option>
+                            <option value="B">意向协商</option>
+                            <option value="C">投标</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>项目面积(平方米)：</td>
+                    <td>
+                        从
+                        <select id="xm_mj_beg" name="xm_mj_beg">
+                            <option value="0" selected="selected">0</option>
+                            <option value="200">200</option>
+                            <option value="500">500</option>
+                            <option value="1000">1000</option>
+                            <option value="3000">3000</option>
+                            <option value="5000">5000</option>
+                            <option value="10000">1万</option>
+                            <option value="30000">3万</option>
+                            <option value="50000">5万</option>
+                        </select>
+                        至
+                        <select id="xm_mj_end" name="xm_mj_end">
+                            <option value="200">200</option>
+                            <option value="500">500</option>
+                            <option value="1000">1000</option>
+                            <option value="3000">3000</option>
+                            <option value="5000">5000</option>
+                            <option value="10000">1万</option>
+                            <option value="30000">3万</option>
+                            <option value="50000">5万</option>
+                            <option value="100000">10万</option>
+                            <option value="1000000" selected="selected">100万</option>
+                        </select>
+                    </td>
+                    <td>项目金额(万元):</td>
+                    <td>
+                        从<select id="hetong_amt_beg" name="hetong_amt_beg">
+                            <option value="0" selected="selected">0</option>
+                            <option value="50">50万</option>
+                            <option value="100">100万</option>
+                            <option value="200">200万</option>
+                            <option value="500">500万</option>
+                            <option value="1000">1000万</option>
+                            <option value="3000">3000万</option>
+                            <option value="5000">5000万</option>
+                            <option value="10000">1亿</option>
+                        </select>
+                        至
+                        <select id="hetong_amt_end" name="hetong_amt_end">
+                            <option value="50">50万</option>
+                            <option value="100">100万</option>
+                            <option value="200">200万</option>
+                            <option value="500">500万</option>
+                            <option value="1000">1000万</option>
+                            <option value="3000">3000万</option>
+                            <option value="5000">5000万</option>
+                            <option value="10000">1亿</option>
+                            <option value="100000" selected>10亿</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        项目行业:</td>
+                    <td>
+                        选择:
+                        <select id="pro_trade_base" name="pro_trade_base" >
+                            <option value="all"  selected="selected">全部</option>
+                            <option value="A">IT</option>
+                            <option value="B">金融</option>
+                            <option value="C">医药</option>
+                            <option value="D">食品</option>
+                            <option value="E">工业</option>
+                            <option value="F">物流</option>
+                            <option value="G">汽车</option>
+                            <option value="H">能源</option>
+                            <option value="I">零售</option>
+                            <option value="J">日用品</option>
+                            <option value="K">咨询</option>
+                            <option value="L">其它</option>
+                        </select>
+                    </td>
+                    <td><INPUT type="reset" value="取消" id="reset"></td>
+                    <td><button type="button" id="butDxmsearch" >查询</button></td>
+                </tr>
+            </table>
+            <!--</form>-->
+        </div>
+        <br>
+        <br>
+        <div>
+            <table id="dxmgl"></table>
+            <div id="pdxmgl"></div>
+        </div>
+        <br>
+        <br>
+        <div>
+            <table>
+                <tr>
+                    <td><div id="dxmgl_1_chartContainer">FusionCharts XT will load here!</div></td>
+                    <td><div id="dxmgl_2_chartContainer">FusionCharts XT will load here!</div></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>

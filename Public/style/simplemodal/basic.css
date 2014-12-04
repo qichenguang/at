@@ -1,0 +1,36 @@
+/* Overlay */
+#simplemodal-overlay
+{
+    background-color:#000;
+    cursor:wait;
+}
+
+/* Container */
+#simplemodal-container
+{
+    background-color:#fff;
+    border:3px solid #614f1a;
+}
+#simplemodal-container a.modalCloseImg  {
+    background:url(../images/Close.png) no-repeat; /* adjust url as required */
+    width:300px;
+    height:30px;
+    display:inline;
+    z-index:3200;
+    position:absolute;
+    right:-15px;
+    top:-15px;
+    cursor:pointer;
+}
+
+#simplemodal-container a.modalCloseImg :hover {
+    background:url(../images/Close2.png) no-repeat; /* adjust url as required */
+    width:30px;
+    height:30px;
+    display:inline;
+    z-index:3200;
+    position:absolute;
+    right:-15px;
+    top:-15px;
+    cursor:pointer;
+}

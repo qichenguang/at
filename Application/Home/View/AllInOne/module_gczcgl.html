@@ -1,0 +1,411 @@
+<script type="text/javascript">
+    $(document).ready(function() {
+        function get_dep_sx_from_name(name){
+            var dep_arr = {
+                "采购管理部" : 'cg',
+                "售后服务部" : 'sh',
+                "行政人事部" : 'hr',
+                "工程管理部" : 'gc',
+                "机电管理部" : 'jd',
+                "设计管理部" : 'sj',
+                "市场管理部" : 'sc',
+                "预算管理部" : 'ys'
+            };
+            return dep_arr[name];
+        }
+        function get_dep_opt_str(dep_sx){
+            var dep_arr = {
+                'cg':"采购管理部",
+                'sh':"售后服务部",
+                'gc':"工程管理部",
+                'jd':"机电管理部",
+                'sj':"设计管理部",
+                'sc':"市场管理部",
+                'ys':"预算管理部"
+            };
+            var str = "";
+            str += "<option value='all'>请选择</option>";
+            str += "<option value='" + dep_sx + "'>" + dep_arr[dep_sx] + "</option>";
+            return str;
+        }
+
+        function get_dep_in_type_opt_str(dep){
+            var all_item = {key2:'all',val2:'请选择'};
+            var a = {key2:'A',val2:'管理'};
+            var b = {key2:'B',val2:'设计'};
+            var c = {key2:'C',val2:'施工'};
+            var dep_in_type = {
+                'sc': [all_item,a],
+                'ys': [all_item,a,b,c],
+                'sj': [all_item,a,b,c],
+                'jd': [all_item,a,b,c],
+                'gc': [all_item,a,b,c],
+                'cg': [all_item,a,b,c],
+                'sh': [all_item,b,c]
+            };
+            var str = "";
+            var in_type_arr = dep_in_type[dep];
+            if($.isArray(in_type_arr)){
+                $.each(in_type_arr,function(i,item){
+                    //alert(in_type_arr);
+                    str += "<option value='" + item.key2 + "'>" + item.val2 + "</option>";
+                });
+            }
+            //
+            return str;
+        }
+        function get_dep_in_sub_type_opt_str(dep){
+            var all_item = {key2:'all',val2:'请选择'};
+            var a = {key2:'A' , val2: "大厦"};
+            var b = {key2:'B' , val2: "管理公司"};
+            var c = {key2:'C' , val2: "客户"};
+            var d = {key2:'D' , val2: "顾问"};
+            var e = {key2:'E' , val2: "消防局"};
+            var f = {key2:'F' , val2: "建委"};
+            var g = {key2:'G' , val2: "客户设施维护FM"};
+            var h = {key2:'H' , val2: "天花"};
+            var i = {key2:'I' , val2: "地面"};
+            var j = {key2:'J' , val2: "墙"};
+            var k = {key2:'K' , val2: "门"};
+            var l = {key2:'L' , val2: "五金"};
+            var m = {key2:'M' , val2: "饰面"};
+            var n = {key2:'N' , val2: "系统家具"};
+            var o = {key2:'O' , val2: "固定家具"};
+            var p = {key2:'P' , val2: "EL"};
+            var q = {key2:'Q' , val2: "HVAC"};
+            var r = {key2:'R' , val2: "FS"};
+            var s = {key2:'S' , val2: "PD"};
+            var t = {key2:'T' , val2: "IT"};
+            var u = {key2:'U' , val2: "SEC"};
+            var v = {key2:'V' , val2: "AV"};
+            var w = {key2:'W' , val2: "管理"};
+            var x = {key2:'X' , val2: "平面"};
+            var y = {key2:'Y' , val2: "效果图"};
+
+            var dep_in_type = {
+                'sc': [all_item,a,b,c,d,e,f,g],
+                'ys': [all_item,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w],
+                'sj': [all_item,h,i,j,k,l,m,n,o,w,x,y],
+                'jd': [all_item,p,q,r,s,t,u,v,w],
+                'gc': [all_item,a,b,c,d,e,f,g,h,i,j,k,l,m,m,o,p,q,r,s,t,u,v],
+                'cg': [all_item,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w],
+                'sh': [all_item,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v]
+            };
+            var str = "";
+            var in_type_arr = dep_in_type[dep];
+            if($.isArray(in_type_arr)){
+                $.each(in_type_arr,function(i,item){
+                    //alert(in_type_arr);
+                    str += "<option value='" + item.key2 + "'>" + item.val2 + "</option>";
+                });
+            }
+            return str;
+        }
+        function setGczcjlJqGrid(domTableId,domPageId,cur_pro_id,cur_user_id){
+            console.log(cur_pro_id);
+            var $gridobj = jQuery(domTableId).jqGrid({
+                url:'/index.php/Home/AllInOne/ajaxGczcjlSearch',
+                datatype: "json",
+                mtype: 'POST',
+                postData: {pro_id:cur_pro_id},
+                colNames:['ID','部门','类型','细目','经验总结','遇到问题','解决方案','参考资料'],
+                colModel:[
+                    {name:'id',index:'id',
+                        width:20,align:"right",
+                        sortable:true,
+                        editable:false,
+                        readonly:true,
+                        editoptions:{readonly:true,size:100},
+                        formoptions:{rowpos:1, label: "id", elmprefix:"(*)"}
+                    },
+                    {name:'department',index:'department',
+                        width:40, align:"center",
+                        sortable:true,
+                        stype:'select',//查询类型
+                        editable:true,edittype:"select",
+                        editoptions:{
+                            value:{
+                                'all':"全部",
+                                'cg':"采购管理部",
+                                'sh':"售后服务部",
+                                'gc':"工程管理部",
+                                'jd':"机电管理部",
+                                'sj':"设计管理部",
+                                'sc':"市场管理部",
+                                'ys':"预算管理部"
+                            },
+                            defaultValue:"all",
+                            dataEvents: [
+                                {
+                                    type: 'focus', //change 下拉选择的时候
+                                    fn: function(event){
+                                        var cur_id = event.target.id;
+                                        //alert(cur_id);
+                                        if(cur_id.indexOf("new_row") != -1){
+                                            var dep_sx = $("#user_department").val();
+                                            //alert(dep_sx);
+                                            var str = get_dep_opt_str(dep_sx);
+                                            //alert(str2);
+                                            $("#new_row_department").empty();
+                                            $("#new_row_department").append(str);
+                                            $("#new_row_department").val(dep_sx);
+                                            //alert($cur_dep);
+                                            var $in_type = $("select#new_row_in_type");   //获取下面下拉框RoleName对象
+                                            var $in_sub_type = $("select#new_row_in_sub_type");   //获取下面下拉框RoleName对象
+                                            $in_type.empty();
+                                            $in_sub_type.empty();
+                                            str = get_dep_in_type_opt_str(dep_sx);
+                                            //alert(str);
+                                            $in_type.append(str);                    // 然后绑定下拉框
+                                            str = get_dep_in_sub_type_opt_str(dep_sx);
+                                            $in_sub_type.append(str);                    // 然后绑定下拉框
+                                        }else{
+                                            var id = cur_id.substring(0,cur_id.indexOf("_"));
+                                            var $old_in_type_id = $("#" + id + "_in_type");
+                                            var $old_in_sub_type_id = $("#" + id + "_in_sub_type");
+                                            var old_in_type_val = $old_in_type_id.val();
+                                            var old_in_sub_type_val = $old_in_sub_type_id.val();
+                                            var dep_sx = $("#user_department").val();
+                                            var str = get_dep_opt_str(dep_sx);
+                                            $("#" + cur_id).empty();
+                                            $("#" + cur_id).append(str);
+                                            $("#" + cur_id).val(dep_sx);
+                                            //
+                                            $old_in_type_id.empty();
+                                            $old_in_sub_type_id.empty();
+                                            str = get_dep_in_type_opt_str(dep_sx);
+                                            $old_in_type_id.append(str);
+                                            str = get_dep_in_sub_type_opt_str(dep_sx);
+                                            $old_in_sub_type_id.append(str);
+                                            //
+                                            $old_in_type_id.val(old_in_type_val);
+                                            $old_in_sub_type_id.val(old_in_sub_type_val);
+                                        }
+                                    }
+                                }
+                            ]
+                        },
+                        editrules:{required:true},
+                        formoptions:{ rowpos:2,label: "部门",elmprefix:"(*)"}
+                    },
+                    {name:'in_type',index:'in_type',
+                        width:30, align:"center",
+                        sortable:true,
+                        stype:'select',//查询类型
+                        editable:true,edittype:"select",
+                        editoptions:{
+                            value:{
+                                'all':"全部",
+                                'A':"管理",
+                                'B':"设计",
+                                'C':"施工"
+                            },
+                            defaultValue:"all",
+                            dataEvents: [
+                                {
+                                    type: 'change', //下拉选择的时候
+                                    fn: function(event){
+                                    }
+                                }
+                            ]
+                        },
+                        editrules:{required:true},
+                        formoptions:{ rowpos:3,label: "类型",elmprefix:"(*)"}
+                    },
+                    {name:'in_sub_type',index:'in_sub_type',
+                        width:50, align:"center",
+                        sortable:true,
+                        stype:'select',//查询类型
+                        editable:true,edittype:"select",
+                        editoptions:{value:{
+                            'all':"全部",
+                            'A' : "大厦",
+                            'B' : "管理公司",
+                            'C' : "客户",
+                            'D' : "顾问",
+                            'E' : "消防局",
+                            'F' : "建委",
+                            'G' : "客户设施维护FM",
+                            'H' : "天花",
+                            'I' : "地面",
+                            'J' : "墙",
+                            'K' : "门",
+                            'L' : "五金",
+                            'M' : "饰面",
+                            'N' : "系统家具",
+                            'O' : "固定家具",
+                            'P' : "EL",
+                            'Q' : "HVAC",
+                            'R' : "FS",
+                            'S' : "PD",
+                            'T' : "IT",
+                            'U' : "SEC",
+                            'V' : "AV",
+                            'W' : "管理",
+                            'X' : "平面",
+                            'Y' : "效果图"
+                        },defaultValue:"all"},
+                        editrules:{required:true},
+                        formoptions:{ rowpos:4,label: "细目",elmprefix:"(*)"}
+                    },
+                    {name:'jyzj',index:'jyzj',
+                        width:'100%',align:"right",
+                        sortable:true,
+                        editable:true, edittype:"textarea",editrules:{required:true},
+                        editoptions:{rows:"3",cols:"30"},
+                        formoptions:{rowpos:5, label: "经验总结", elmprefix:"(*)"}
+                    },
+                    {name:'ydwt',index:'ydwt',
+                        width:'100%',align:"right",
+                        sortable:true,
+                        editable:true, edittype:"textarea",editrules:{required:true},
+                        editoptions:{rows:"3",cols:"30"},
+                        formoptions:{rowpos:6, label: "具体问题", elmprefix:"(*)"}
+                    },
+                    {name:'jjfa',index:'jjfa',
+                        width:150,align:"right",
+                        sortable:true,
+                        editable:true, edittype:"textarea",editrules:{required:true},
+                        editoptions:{rows:"3",cols:"30"},
+                        formoptions:{rowpos:7, label: "解决方案", elmprefix:"(*)"}
+                    },
+                    {name:'ckwj',index:'ckwj',
+                        width:150,align:"right",
+                        sortable:true,
+                        editable:true, edittype:"textarea",editrules:{required:true},
+                        editoptions:{rows:"3",cols:"30"},
+                        formoptions:{rowpos:8, label: "参考资料", elmprefix:"(*)"}
+                    }
+                ],
+                hiddengrid: false,
+                autowidth: true,
+                rownumbers: true,
+                rowNum:20,
+                rowList:[20,30,50],
+                pager: domPageId,
+                viewrecords: true,
+                sortorder: "desc",
+                forceFit : true,
+                editurl: '/index.php/Home/AllInOne/ajaxGczcjlSave',
+                caption:"",
+                onSelectRow: function(id){
+                    var rowid = jQuery(domTableId).jqGrid('getGridParam','selrow');
+                    if(rowid){
+                        var rowData = $(domTableId).jqGrid('getRowData',rowid);
+                         var dep_sx = get_dep_sx_from_name(rowData.department);
+                         if(dep_sx != $("#user_department").val()){
+                             $('#gczcjl_iledit').addClass('ui-state-disabled');
+                             $('#del_gczcjl').addClass('ui-state-disabled');
+                         }else{
+                             $('#gczcjl_iledit').removeClass('ui-state-disabled');
+                             $('#del_gczcjl').removeClass('ui-state-disabled');
+                         }
+                     }
+
+                },
+                onCellSelect: function(){
+
+                },
+                afterInsertRow:function(rowid,rowdata,rowelem){
+                    //alert(rowid);
+                }
+            });
+
+            //导航栏配置和CRUD函数
+            jQuery(domTableId).jqGrid('navGrid',domPageId,
+                    {view:true,search:false,edit:false,add:false,del:true}
+            );
+            //
+            var addparameters = {
+                rowID : "new_row",
+                initdata : {},
+                position :"first",
+                useDefValues : false,
+                useFormatter : false,
+                addRowParams : {
+                    extraparam:{pro_id:cur_pro_id,user_id:cur_user_id},
+                    successfunc : function(xhr){
+                        //alert("successfunc");
+                        //console.log(xhr);
+                        var result = eval('(' + xhr.responseText + ')');
+                        if(true == result.state){
+                            //alert(result.msg);
+                            //alert(result.msg);
+                            //重新载入,自动调用
+                            //$gridobj.trigger("reloadGrid"); //重新载入
+                            //alert(result.id);
+                            //jQuery(domTableId).setCell (1,1,result.id);
+                            jQuery(domTableId).trigger("reloadGrid");
+                            return true;
+                        }else{
+                            jAlert(result.msg);
+                            return true;
+                        }
+                    }
+                }
+            }
+            //
+            var editparameters = {
+                "keys" : false,
+                "oneditfunc" : null,
+                "successfunc" : function(xhr){
+                    //alert("successfunc");
+                    //console.log(xhr);
+                    var result = eval('(' + xhr.responseText + ')');
+                    if(true == result.state){
+                        //alert(result.msg);
+                        //alert(result.msg);
+                        //重新载入,自动调用
+                        //$gridobj.trigger("reloadGrid"); //重新载入
+                        //alert(result.id);
+                        return true;
+                    }else{
+                        jAlert(result.msg);
+                        return true;
+                    }
+                },
+                "url" : null,
+                "extraparam" : {pro_id:cur_pro_id,user_id:cur_user_id},
+                "aftersavefunc" : null,
+                "errorfunc": null,
+                "afterrestorefunc" : null,
+                "restoreAfterError" : true,
+                "mtype" : "POST"
+            }
+            var parameters = {
+                edit: true,
+                editicon: "ui-icon-pencil",
+                add: true,
+                addicon:"ui-icon-plus",
+                save: true,
+                saveicon:"ui-icon-disk",
+                cancel: true,
+                cancelicon:"ui-icon-cancel",
+                addParams : addparameters,
+                editParams : editparameters
+            }
+            jQuery(domTableId).jqGrid('inlineNav',domPageId,parameters);
+
+
+            //其他配置
+            jQuery(domTableId).jqGrid('gridResize',{minWidth:1500,maxWidth:2000,minHeight:500, maxHeight:1000});
+            jQuery(domTableId).jqGrid('sortableRows');
+            jQuery(domTableId).jqGrid('filterToolbar');
+            if($(domPageId + ":contains(Toggle)").length < 1){
+                jQuery(domTableId).jqGrid('navButtonAdd',domPageId,{caption:"Toggle",title:"Toggle Search Toolbar", buttonicon :'ui-icon-pin-s',
+                    onClickButton:function(){
+                        $gridobj[0].toggleToolbar();
+                    }
+                });
+            }
+        }
+        setGczcjlJqGrid("#gczcjl","#pgczcjl",$("#pro_id").val(),$("#user_id").val());
+    });
+</script>
+<div id="module_gczcgl"  class="module">
+    <h3><a href="#">过程资产积累</a></h3>
+    <div>
+        <table id="gczcjl"></table>
+        <div id="pgczcjl"></div>
+    </div>
+</div>

@@ -1,0 +1,942 @@
+<script type="text/javascript">
+    $(document).ready(function() {
+        var zb_flag = $("#cur_project_sc_zb_flag").val();
+        //alert(zb_flag);
+        if("A" == zb_flag){
+            var depcode = $("#user_department").val();
+            //如果是落标状态，所有的字段 SC 都可以操作
+            if("sc" == depcode){
+                $("#module_xmrlzygl :input").attr("disabled",false);
+                $("#module_xmrlzygl :input").removeClass("ui-state-disabled");
+            }else{
+                $("#module_xmrlzygl :input").attr("disabled",true);
+                $("#module_xmrlzygl :input").addClass("ui-state-disabled");
+            }
+        }
+        //
+        $("#module_xmrlzygl SELECT[jb_choose]").on('change',function(event){
+            var rate_limit = parseInt($(this).attr('jb_choose'));
+            if(rate_limit > 0){
+                //
+            }else{
+                rate_limit = 100;
+            }
+            var select_id = $(this).attr('id');
+            var man_id = select_id.substring(0,select_id.lastIndexOf("_choose"));
+            var cur_id = man_id.substring(man_id.length -1);
+            //alert("cur_id=" + cur_id);
+            //alert(select_id);
+            //alert(man_id);
+            var man_id_base = man_id.substring(0,man_id.length -1);
+            //alert(man_id_base);
+            var man_id_1 = man_id_base + "1";
+            var $man_id_1 = $("#" + man_id_1);
+            var $select_id_1 = $("#" + man_id_1 + "_choose" );
+            var man_id_2 = man_id_base + "2";
+            var $man_id_2 = $("#" + man_id_2);
+            var $select_id_2 = $("#" + man_id_2 + "_choose" );
+            var man_id_3 = man_id_base + "3";
+            var $man_id_3 = $("#" + man_id_3);
+            var $select_id_3 = $("#" + man_id_3 + "_choose" );
+            //alert($man_id_1.val());
+            //alert($select_id_1.val());
+            var pos_flag = 0;
+            if($man_id_1.val() > 0){
+                pos_flag = 1;
+                if($man_id_2.val() > 0){
+                    pos_flag = 2;
+                    if($man_id_3.val() > 0){
+                        pos_flag = 3;
+                    }
+                }
+            }
+            //alert(pos_flag);
+            if(1 == pos_flag){
+                if(1 == cur_id){
+                    //set self
+                    return;
+                }
+            }else if(2 == pos_flag){
+                if(1 == cur_id){
+                    $select_id_2.val(rate_limit - $select_id_1.val());
+                    return;
+                }else if(2 == cur_id){
+                    $select_id_1.val(rate_limit - $select_id_2.val());
+                    return;
+                }
+            }else if(3 == pos_flag){
+                if(1 == cur_id){
+                    $select_id_2.val(rate_limit - $select_id_1.val());
+                    $select_id_3.val(0);
+                    return;
+                }else if(2 == cur_id){
+                    if(parseInt(parseInt($select_id_1.val()) + parseInt($select_id_2.val())) > rate_limit ){
+                        //alert(parseInt($select_id_1.val() + $select_id_2.val()));
+                        $select_id_2.val(rate_limit - $select_id_1.val());
+                        $select_id_3.val(0);
+                    }else{
+                        $select_id_3.val(rate_limit - $select_id_1.val() - $select_id_2.val());
+                    }
+                    return;
+                }else if(3 == cur_id){
+                    if(parseInt(parseInt($select_id_1.val()) + parseInt($select_id_3.val())) > rate_limit ){
+                        $select_id_3.val(rate_limit - $select_id_1.val());
+                        $select_id_2.val(0);
+                    }else{
+                        $select_id_2.val(rate_limit - $select_id_1.val() - $select_id_3.val());
+                    }
+                    return;
+                }
+            }
+            //fail then set 0
+            $(this).val(0);
+            alert("error! 请先选择前面的比例");
+        });
+/*        $("#module_xmrlzygl tbody tr").click(function(){
+            $(this).hide();
+        });*/
+       $("#module_xmrlzygl tbody tr td select[jb_choose]").each(function(index,elem){
+           $cur_tr = $(this).parent().parent();
+            if($(this).val() > 0){
+                $cur_tr.show();
+            }else{
+                var cur_id = $cur_tr.find('select[jb_dep]').attr("id");
+                var cur_pos = cur_id.substr(cur_id.length - 1);
+                if(cur_pos >1){
+                    $cur_tr.hide();
+                }
+            }
+        });
+        $("#module_xmrlzygl tbody tr td a[opt]").click(function(event){
+            event.preventDefault();
+            var opt = $(this).attr("opt");
+            if("add" == opt){
+                $(this).parent().parent().next().show();
+            }else{
+                $opt_tr = $(this).parent().parent().next();
+                var cur_id = $opt_tr.find('select[jb_dep]').attr("id");
+                var cur_pos = cur_id.substr(cur_id.length - 1);
+                if(2 == cur_pos ){
+                    var cur_1_val = $opt_tr.prev().find('select[jb_choose]').val();
+                    var cur_2_val = $opt_tr.find('select[jb_choose]').val();
+                    var cur_3_val = $opt_tr.next().find('select[jb_choose]').val();
+
+                    var disable = $opt_tr.find('select[jb_choose]').attr("disabled");
+                    if(!disable){
+                        $opt_tr.find('select').val(0);
+                        $opt_tr.next().find('select').val(0);
+                        $opt_tr.prev().find('select[jb_choose]').val((parseInt(cur_1_val)||0) + (parseInt(cur_2_val)||0) + (parseInt(cur_3_val)||0));
+                    }
+
+                    $opt_tr.hide();
+                    $opt_tr.next().hide();
+                }else{
+                    var cur_3_val = $opt_tr.find('select[jb_choose]').val();
+                    var cur_2_val = $opt_tr.prev().find('select[jb_choose]').val();
+                    var disable = $opt_tr.find('select[jb_choose]').attr("disabled");
+                    if(!disable){
+                        $opt_tr.find('select').val(0);
+                        $opt_tr.prev().find('select[jb_choose]').val((parseInt(cur_2_val) || 0) + (parseInt(cur_3_val) || 0));
+                    }
+                    $opt_tr.hide();
+                }
+            }
+        });
+    });
+</script>
+
+
+<div id="module_xmrlzygl"  class="module">
+    <h3><a href="#">项目人力资源管理</a></h3>
+    <div>
+        <!--     项目人力资源管理
+
+                部门	岗位	人员	同一岗位多人员工作比	说明	编程说明
+                市场部	市场经理	来自市场部	来自市场部	可输入文字说明	工作比默认为100%
+                市场部助理	来自市场部		可输入文字说明	无需设置工作比例
+        -->
+        <table jb_table="bordered">
+            <thead>
+                <tr>
+                    <th>部门</th>
+                    <th>岗位</th>
+                    <th>人员</th>
+                    <th>同一岗位多人员工作比</th>
+                    <th>说明</th>
+                    <th>显示/隐藏</th>
+                </tr>
+            </thead>
+            <tbody>
+            <!--市场部------------------------------------------------------------------------------------------------------------>
+            <tr>
+                <td>市场部</td>
+                <td>市场经理</td>
+                <td><SELECT type="text" id="sc_rlzy_scjl" name="sc_rlzy_scjl"  jb_dep="sc"  jb_field="jb_single_save" />
+                </td>
+                <td>100%</td>
+                <td>
+                    <textarea id="sc_rlzy_scjl_desc" name="sc_rlzy_scjl_desc"  jb_field="jb_single_save" ></textarea>
+                </td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>市场部</td>
+                <td>市场助理</td>
+                <td><SELECT type="text" id="sc_rlzy_sczl" name="sc_rlzy_sczl"  jb_dep="sc"  jb_field="jb_single_save" />
+                </td>
+                <td>0%</td>
+                <td>
+                    <textarea id="sc_rlzy_sczl_desc" name="sc_rlzy_sczl_desc"  jb_field="jb_single_save" cols="50" rows="2"></textarea>
+                </td>
+                <td></td>
+            </tr>
+            <!--市场部------------------------------------------------------------------------------------------------------------>
+            <!--预算部------------------------------------------------------------------------------------------------------------>
+            <tr>
+                <td>预算部</td>
+                <td>预算员1</td>
+                <td><SELECT type="text" id="ys_rlzy_ysy1" name="ys_rlzy_ysy1"  jb_dep="ys"  jb_field="jb_single_save" />
+                </td>
+                <td>
+                    <SELECT type="text" id="ys_rlzy_ysy1_choose" name="ys_rlzy_ysy1_choose"  jb_choose="ys"  jb_field="jb_single_save" >
+                        <option value="0" >0</option>
+                        <option value="10">10</option>
+                        <option value="20">20</option>
+                        <option value="30">30</option>
+                        <option value="40">40</option>
+                        <option value="50">50</option>
+                        <option value="60">60</option>
+                        <option value="70">70</option>
+                        <option value="80">80</option>
+                        <option value="90">90</option>
+                        <option value="100" selected="selected">100</option>
+                    </select>
+                </td>
+                <td>
+                    <textarea id="ys_rlzy_ysy1_desc" name="ys_rlzy_ysy1_desc"  jb_field="jb_single_save" ></textarea>
+                </td>
+                <td><a opt="add" href="#" style="text-decoration:none">+</a>&nbsp;&nbsp;&nbsp;<a opt="del" href="#" style="text-decoration:none">-</a></td>
+            </tr>
+            <tr>
+                <td>预算部</td>
+                <td>预算员2</td>
+                <td><SELECT type="text" id="ys_rlzy_ysy2" name="ys_rlzy_ysy2"  jb_dep="ys"  jb_field="jb_single_save" />
+                </td>
+                <td>
+                    <SELECT type="text" id="ys_rlzy_ysy2_choose" name="ys_rlzy_ysy2_choose"  jb_choose="ys"  jb_field="jb_single_save" >
+                        <option value="0" selected="selected">0</option>
+                        <option value="10">10</option>
+                        <option value="20">20</option>
+                        <option value="30">30</option>
+                        <option value="40">40</option>
+                        <option value="50">50</option>
+                        <option value="60">60</option>
+                        <option value="70">70</option>
+                        <option value="80">80</option>
+                        <option value="90">90</option>
+                        <option value="100">100</option>
+                    </select>
+                </td>
+                <td>
+                    <textarea id="ys_rlzy_ysy2_desc" name="ys_rlzy_ysy2_desc"  jb_field="jb_single_save" ></textarea>
+                </td>
+                <td><a opt="add" href="#" style="text-decoration:none">+</a>&nbsp;&nbsp;&nbsp;<a opt="del" href="#" style="text-decoration:none">-</a></td>
+            </tr>
+            <tr>
+                <td>预算部</td>
+                <td>预算员3</td>
+                <td><SELECT type="text" id="ys_rlzy_ysy3" name="ys_rlzy_ysy3"  jb_dep="ys"  jb_field="jb_single_save" />
+                </td>
+                <td>
+                    <SELECT type="text" id="ys_rlzy_ysy3_choose" name="ys_rlzy_ysy3_choose"  jb_choose="ys"  jb_field="jb_single_save" >
+                        <option value="0" selected="selected">0</option>
+                        <option value="10">10</option>
+                        <option value="20">20</option>
+                        <option value="30">30</option>
+                        <option value="40">40</option>
+                        <option value="50">50</option>
+                        <option value="60">60</option>
+                        <option value="70">70</option>
+                        <option value="80">80</option>
+                        <option value="90">90</option>
+                        <option value="100">100</option>
+                    </select>
+                </td>
+                <td>
+                    <textarea id="ys_rlzy_ysy3_desc" name="ys_rlzy_ysy3_desc"  jb_field="jb_single_save" ></textarea>
+                </td>
+                <td></td>
+            </tr>
+            <!--预算部------------------------------------------------------------------------------------------------------------>
+            <!--设计部------------------------------------------------------------------------------------------------------------>
+            <tr>
+                <td>设计部</td>
+                <td>高级设计师1</td>
+                <td><SELECT type="text" id="sj_rlzy_gjsjs1" name="sj_rlzy_gjsjs1"  jb_dep="sj"  jb_field="jb_single_save" />
+                </td>
+                <td>
+                    <SELECT type="text" id="sj_rlzy_gjsjs1_choose" name="sj_rlzy_gjsjs1_choose"  jb_choose="sj"  jb_field="jb_single_save" >
+                        <option value="0" >0</option>
+                        <option value="10">10</option>
+                        <option value="20">20</option>
+                        <option value="30">30</option>
+                        <option value="40">40</option>
+                        <option value="50">50</option>
+                        <option value="60">60</option>
+                        <option value="70">70</option>
+                        <option value="80">80</option>
+                        <option value="90">90</option>
+                        <option value="100" selected="selected">100</option>
+                    </select>
+                </td>
+                <td>
+                    <textarea id="sj_rlzy_gjsjs1_desc" name="sj_rlzy_gjsjs1_desc"  jb_field="jb_single_save" ></textarea>
+                </td>
+                <td><a opt="add" href="#" style="text-decoration:none">+</a>&nbsp;&nbsp;&nbsp;<a opt="del" href="#" style="text-decoration:none">-</a></td>
+            </tr>
+            <tr>
+                <td>设计部</td>
+                <td>高级设计师2</td>
+                <td><SELECT type="text" id="sj_rlzy_gjsjs2" name="sj_rlzy_gjsjs2"  jb_dep="sj"  jb_field="jb_single_save" />
+                </td>
+                <td>
+                    <SELECT type="text" id="sj_rlzy_gjsjs2_choose" name="sj_rlzy_gjsjs2_choose"  jb_choose="sj"  jb_field="jb_single_save" >
+                        <option value="0" selected="selected">0</option>
+                        <option value="10">10</option>
+                        <option value="20">20</option>
+                        <option value="30">30</option>
+                        <option value="40">40</option>
+                        <option value="50">50</option>
+                        <option value="60">60</option>
+                        <option value="70">70</option>
+                        <option value="80">80</option>
+                        <option value="90">90</option>
+                        <option value="100">100</option>
+                    </select>
+                </td>
+                <td>
+                    <textarea id="sj_rlzy_gjsjs2_desc" name="sj_rlzy_gjsjs2_desc"  jb_field="jb_single_save" ></textarea>
+                </td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>设计部</td>
+                <td>效果图设计师1</td>
+                <td><SELECT type="text" id="sj_rlzy_xgsjs1" name="sj_rlzy_xgsjs1"  jb_dep="sj"  jb_field="jb_single_save" />
+                </td>
+                <td>
+                    <SELECT type="text" id="sj_rlzy_xgsjs1_choose" name="sj_rlzy_xgsjs1_choose"  jb_choose="sj"  jb_field="jb_single_save" >
+                        <option value="0" >0</option>
+                        <option value="10">10</option>
+                        <option value="20">20</option>
+                        <option value="30">30</option>
+                        <option value="40">40</option>
+                        <option value="50">50</option>
+                        <option value="60">60</option>
+                        <option value="70">70</option>
+                        <option value="80">80</option>
+                        <option value="90">90</option>
+                        <option value="100" selected="selected">100</option>
+                    </select>
+                </td>
+                <td>
+                    <textarea id="sj_rlzy_xgsjs1_desc" name="sj_rlzy_xgsjs1_desc"  jb_field="jb_single_save" ></textarea>
+                </td>
+                <td><a opt="add" href="#" style="text-decoration:none">+</a>&nbsp;&nbsp;&nbsp;<a opt="del" href="#" style="text-decoration:none">-</a></td>
+            </tr>
+            <tr>
+                <td>设计部</td>
+                <td>效果图设计师2</td>
+                <td><SELECT type="text" id="sj_rlzy_xgsjs2" name="sj_rlzy_xgsjs2"  jb_dep="sj"  jb_field="jb_single_save" />
+                </td>
+                <td>
+                    <SELECT type="text" id="sj_rlzy_xgsjs2_choose" name="sj_rlzy_xgsjs2_choose"  jb_choose="sj"  jb_field="jb_single_save" >
+                        <option value="0" selected="selected">0</option>
+                        <option value="10">10</option>
+                        <option value="20">20</option>
+                        <option value="30">30</option>
+                        <option value="40">40</option>
+                        <option value="50">50</option>
+                        <option value="60">60</option>
+                        <option value="70">70</option>
+                        <option value="80">80</option>
+                        <option value="90">90</option>
+                        <option value="100">100</option>
+                    </select>
+                </td>
+                <td>
+                    <textarea id="sj_rlzy_xgsjs2_desc" name="sj_rlzy_xgsjs2_desc"  jb_field="jb_single_save" ></textarea>
+                </td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>设计部</td>
+                <td>施工图负责人1</td>
+                <td><SELECT type="text" id="sj_rlzy_sgtfzr1" name="sj_rlzy_sgtfzr1"  jb_dep="sj"  jb_field="jb_single_save" />
+                </td>
+                <td>
+                    <SELECT type="text" id="sj_rlzy_sgtfzr1_choose" name="sj_rlzy_sgtfzr1_choose"  jb_choose="sj"  jb_field="jb_single_save" >
+                        <option value="0" >0</option>
+                        <option value="10">10</option>
+                        <option value="20">20</option>
+                        <option value="30">30</option>
+                        <option value="40">40</option>
+                        <option value="50">50</option>
+                        <option value="60">60</option>
+                        <option value="70">70</option>
+                        <option value="80">80</option>
+                        <option value="90">90</option>
+                        <option value="100" selected="selected">100</option>
+                    </select>
+                </td>
+                <td>
+                    <textarea id="sj_rlzy_sgtfzr1_desc" name="sj_rlzy_sgtfzr1_desc"  jb_field="jb_single_save" ></textarea>
+                </td>
+                <td><a opt="add" href="#" style="text-decoration:none">+</a>&nbsp;&nbsp;&nbsp;<a opt="del" href="#" style="text-decoration:none">-</a></td>
+            </tr>
+            <tr>
+                <td>设计部</td>
+                <td>施工图负责人2</td>
+                <td><SELECT type="text" id="sj_rlzy_sgtfzr2" name="sj_rlzy_sgtfzr2"  jb_dep="sj"  jb_field="jb_single_save" />
+                </td>
+                <td>
+                    <SELECT type="text" id="sj_rlzy_sgtfzr2_choose" name="sj_rlzy_sgtfzr2_choose"  jb_choose="sj"  jb_field="jb_single_save" >
+                        <option value="0" selected="selected">0</option>
+                        <option value="10">10</option>
+                        <option value="20">20</option>
+                        <option value="30">30</option>
+                        <option value="40">40</option>
+                        <option value="50">50</option>
+                        <option value="60">60</option>
+                        <option value="70">70</option>
+                        <option value="80">80</option>
+                        <option value="90">90</option>
+                        <option value="100">100</option>
+                    </select>
+                </td>
+                <td>
+                    <textarea id="sj_rlzy_sgtfzr2_desc" name="sj_rlzy_sgtfzr2_desc"  jb_field="jb_single_save" ></textarea>
+                </td>
+                <td><a opt="add" href="#" style="text-decoration:none">+</a>&nbsp;&nbsp;&nbsp;<a opt="del" href="#" style="text-decoration:none">-</a></td>
+            </tr>
+            <tr>
+                <td>设计部</td>
+                <td>施工图负责人3</td>
+                <td><SELECT type="text" id="sj_rlzy_sgtfzr3" name="sj_rlzy_sgtfzr3"  jb_dep="sj"  jb_field="jb_single_save" />
+                </td>
+                <td>
+                    <SELECT type="text" id="sj_rlzy_sgtfzr3_choose" name="sj_rlzy_sgtfzr3_choose"  jb_choose="sj"  jb_field="jb_single_save" >
+                        <option value="0" selected="selected">0</option>
+                        <option value="10">10</option>
+                        <option value="20">20</option>
+                        <option value="30">30</option>
+                        <option value="40">40</option>
+                        <option value="50">50</option>
+                        <option value="60">60</option>
+                        <option value="70">70</option>
+                        <option value="80">80</option>
+                        <option value="90">90</option>
+                        <option value="100">100</option>
+                    </select>
+                </td>
+                <td>
+                    <textarea id="sj_rlzy_sgtfzr3_desc" name="sj_rlzy_sgtfzr3_desc"  jb_field="jb_single_save" ></textarea>
+                </td>
+                <td></td>
+            </tr>
+            <!--设计部------------------------------------------------------------------------------------------------------------>
+            <!--工程部------------------------------------------------------------------------------------------------------------>
+            <tr>
+                <td>工程部</td>
+                <td>项目总监</td>
+                <td><SELECT type="text" id="gc_rlzy_xmzj" name="gc_rlzy_xmzj"  jb_dep="gc"  jb_field="jb_single_save" />
+                </td>
+                <td>
+                    0%
+                </td>
+                <td>
+                    <textarea id="gc_rlzy_xmzj_desc" name="gc_rlzy_xmzj_desc"  jb_field="jb_single_save" ></textarea>
+                </td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>工程部</td>
+                <td>项目经理</td>
+                <td><SELECT type="text" id="gc_rlzy_xmxc1" name="gc_rlzy_xmxc1"  jb_dep="gc"  jb_field="jb_single_save" />
+                </td>
+                <td>
+                    <SELECT type="text" id="gc_rlzy_xmxc1_choose" name="gc_rlzy_xmxc1_choose"  jb_choose="gc"  jb_field="jb_single_save" >
+                        <option value="0" selected="selected">0</option>
+                        <option value="10">10</option>
+                        <option value="20">20</option>
+                        <option value="30">30</option>
+                        <option value="40">40</option>
+                        <option value="50">50</option>
+                        <option value="60">60</option>
+                        <option value="70">70</option>
+                        <option value="80">80</option>
+                        <option value="90">90</option>
+                        <option value="100">100</option>
+                    </select>
+                </td>
+                <td>
+                    <textarea id="gc_rlzy_xmxc1_desc" name="gc_rlzy_xmxc1_desc"  jb_field="jb_single_save" ></textarea>
+                </td>
+                <td><a opt="add" href="#" style="text-decoration:none">+</a>&nbsp;&nbsp;&nbsp;<a opt="del" href="#" style="text-decoration:none">-</a></td>
+            </tr>
+            <tr>
+                <td>工程部</td>
+                <td>现场经理</td>
+                <td><SELECT type="text" id="gc_rlzy_xmxc2" name="gc_rlzy_xmxc2"  jb_dep="gc"  jb_field="jb_single_save" />
+                </td>
+                <td>
+                    <SELECT type="text" id="gc_rlzy_xmxc2_choose" name="gc_rlzy_xmxc2_choose"  jb_choose="gc"  jb_field="jb_single_save" >
+                        <option value="0" selected="selected">0</option>
+                        <option value="10">10</option>
+                        <option value="20">20</option>
+                        <option value="30">30</option>
+                        <option value="40">40</option>
+                        <option value="50">50</option>
+                        <option value="60">60</option>
+                        <option value="70">70</option>
+                        <option value="80">80</option>
+                        <option value="90">90</option>
+                        <option value="100">100</option>
+                    </select>
+                </td>
+                <td>
+                    <textarea id="gc_rlzy_xmxc2_desc" name="gc_rlzy_xmxc2_desc"  jb_field="jb_single_save" ></textarea>
+                </td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>工程部</td>
+                <td>装修工长1</td>
+                <td><SELECT type="text" id="gc_rlzy_zxgz1" name="gc_rlzy_zxgz1"  jb_dep="gc"  jb_field="jb_single_save" />
+                </td>
+                <td>
+                    <SELECT type="text" id="gc_rlzy_zxgz1_choose" name="gc_rlzy_zxgz1_choose"  jb_choose="gc"  jb_field="jb_single_save" >
+                        <option value="0" selected="selected">0</option>
+                        <option value="10">10</option>
+                        <option value="20">20</option>
+                        <option value="30">30</option>
+                        <option value="40">40</option>
+                        <option value="50">50</option>
+                        <option value="60">60</option>
+                        <option value="70">70</option>
+                        <option value="80">80</option>
+                        <option value="90">90</option>
+                        <option value="100">100</option>
+                    </select>
+                </td>
+                <td>
+                    <textarea id="gc_rlzy_zxgz1_desc" name="gc_rlzy_zxgz1_desc"  jb_field="jb_single_save" ></textarea>
+                </td>
+                <td><a opt="add" href="#" style="text-decoration:none">+</a>&nbsp;&nbsp;&nbsp;<a opt="del" href="#" style="text-decoration:none">-</a></td>
+            </tr>
+            <tr>
+                <td>工程部</td>
+                <td>装修工长2</td>
+                <td><SELECT type="text" id="gc_rlzy_zxgz2" name="gc_rlzy_zxgz2"  jb_dep="gc"  jb_field="jb_single_save" />
+                </td>
+                <td>
+                    <SELECT type="text" id="gc_rlzy_zxgz2_choose" name="gc_rlzy_zxgz2_choose"  jb_choose="gc"  jb_field="jb_single_save" >
+                        <option value="0" selected="selected">0</option>
+                        <option value="10">10</option>
+                        <option value="20">20</option>
+                        <option value="30">30</option>
+                        <option value="40">40</option>
+                        <option value="50">50</option>
+                        <option value="60">60</option>
+                        <option value="70">70</option>
+                        <option value="80">80</option>
+                        <option value="90">90</option>
+                        <option value="100">100</option>
+                    </select>
+                </td>
+                <td>
+                    <textarea id="gc_rlzy_zxgz2_desc" name="gc_rlzy_zxgz2_desc"  jb_field="jb_single_save" ></textarea>
+                </td>
+                <td><a opt="add" href="#" style="text-decoration:none">+</a>&nbsp;&nbsp;&nbsp;<a opt="del" href="#" style="text-decoration:none">-</a></td>
+            </tr>
+            <tr>
+                <td>工程部</td>
+                <td>装修工长3</td>
+                <td><SELECT type="text" id="gc_rlzy_zxgz3" name="gc_rlzy_zxgz3"  jb_dep="gc"  jb_field="jb_single_save" />
+                </td>
+                <td>
+                    <SELECT type="text" id="gc_rlzy_zxgz3_choose" name="gc_rlzy_zxgz3_choose"  jb_choose="gc"  jb_field="jb_single_save" >
+                        <option value="0" selected="selected">0</option>
+                        <option value="10">10</option>
+                        <option value="20">20</option>
+                        <option value="30">30</option>
+                        <option value="40">40</option>
+                        <option value="50">50</option>
+                        <option value="60">60</option>
+                        <option value="70">70</option>
+                        <option value="80">80</option>
+                        <option value="90">90</option>
+                        <option value="100">100</option>
+                    </select>
+                </td>
+                <td>
+                    <textarea id="gc_rlzy_zxgz3_desc" name="gc_rlzy_zxgz3_desc"  jb_field="jb_single_save" ></textarea>
+                </td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>工程部</td>
+                <td>安全员1</td>
+                <td><SELECT type="text" id="gc_rlzy_aqy1" name="gc_rlzy_aqy1"  jb_dep="gc"  jb_field="jb_single_save" />
+                </td>
+                <td>
+                    <SELECT type="text" id="gc_rlzy_aqy1_choose" name="gc_rlzy_aqy1_choose" disabled="true" jb_choose="" >
+                        <option value="0" selected="selected">0</option>
+                    </select>
+                </td>
+                <td>
+                    <textarea id="gc_rlzy_aqy1_desc" name="gc_rlzy_aqy1_desc"  jb_field="jb_single_save" ></textarea>
+                </td>
+                <td><a opt="add" href="#" style="text-decoration:none">+</a>&nbsp;&nbsp;&nbsp;<a opt="del" href="#" style="text-decoration:none">-</a></td>
+            </tr>
+            <tr>
+                <td>工程部</td>
+                <td>安全员2</td>
+                <td><SELECT type="text" id="gc_rlzy_aqy2" name="gc_rlzy_aqy2"  jb_dep="gc"  jb_field="jb_single_save" />
+                </td>
+                <td>
+                    <SELECT type="text" id="gc_rlzy_aqy2_choose" name="gc_rlzy_aqy2_choose"  disabled="true" jb_choose="" >
+                        <option value="0" selected="selected">0</option>
+                    </select>
+                </td>
+                <td>
+                    <textarea id="gc_rlzy_aqy2_desc" name="gc_rlzy_aqy2_desc"  jb_field="jb_single_save" ></textarea>
+                </td>
+                <td><a opt="add" href="#" style="text-decoration:none">+</a>&nbsp;&nbsp;&nbsp;<a opt="del" href="#" style="text-decoration:none">-</a></td>
+            </tr>
+            <tr>
+                <td>工程部</td>
+                <td>安全员3</td>
+                <td><SELECT type="text" id="gc_rlzy_aqy3" name="gc_rlzy_aqy3"  jb_dep="gc"  jb_field="jb_single_save" />
+                </td>
+                <td>
+                    <SELECT type="text" id="gc_rlzy_aqy3_choose" name="gc_rlzy_aqy3_choose"  disabled="true" jb_choose="" >
+                        <option value="0" selected="selected">0</option>
+                    </select>
+                </td>
+                <td>
+                    <textarea id="gc_rlzy_aqy3_desc" name="gc_rlzy_aqy3_desc"  jb_field="jb_single_save" ></textarea>
+                </td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>工程部</td>
+                <td>库房及保洁负责人1</td>
+                <td><SELECT type="text" id="gc_rlzy_kfbj1" name="gc_rlzy_kfbj1"  jb_dep="gc"  jb_field="jb_single_save" />
+                </td>
+                <td>
+                    <SELECT type="text" id="gc_rlzy_kfbj1_choose" name="gc_rlzy_kfbj1_choose"  disabled="true" jb_choose="" >
+                        <option value="0" selected="selected">0</option>
+                    </select>
+                </td>
+                <td>
+                    <textarea id="gc_rlzy_kfbj1_desc" name="gc_rlzy_kfbj1_desc"  jb_field="jb_single_save" ></textarea>
+                </td>
+                <td><a opt="add" href="#" style="text-decoration:none">+</a>&nbsp;&nbsp;&nbsp;<a opt="del" href="#" style="text-decoration:none">-</a></td>
+            </tr>
+            <tr>
+                <td>工程部</td>
+                <td>库房及保洁负责人2</td>
+                <td><SELECT type="text" id="gc_rlzy_kfbj2" name="gc_rlzy_kfbj2"  jb_dep="gc"   jb_field="jb_single_save" />
+                </td>
+                <td>
+                    <SELECT type="text" id="gc_rlzy_kfbj2_choose" name="gc_rlzy_kfbj2_choose"  disabled="true" jb_choose="" >
+                        <option value="0" selected="selected">0</option>
+                    </select>
+                </td>
+                <td>
+                    <textarea id="gc_rlzy_kfbj2_desc" name="gc_rlzy_kfbj2_desc"  jb_field="jb_single_save" ></textarea>
+                </td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>工程部</td>
+                <td>工程助理</td>
+                <td>
+                    <SELECT type="text" id="gc_rlzy_gczl" name="gc_rlzy_gczl"  jb_dep="gc"  jb_field="jb_single_save" />
+                </td>
+                <td>
+                    0%
+                </td>
+                <td>
+                    <textarea id="gc_rlzy_gczl_desc" name="gc_rlzy_gczl_desc"  jb_field="jb_single_save" ></textarea>
+                </td>
+                <td></td>
+            </tr>
+            <!--工程部------------------------------------------------------------------------------------------------------------>
+            <!--机电部------------------------------------------------------------------------------------------------------------>
+            <tr>
+                <td>机电部</td>
+                <td>机电总负责人</td>
+                <td><SELECT type="text" id="jd_rlzy_jdzfzr" name="jd_rlzy_jdzfzr"  jb_dep="jd"  jb_field="jb_single_save" />
+                </td>
+                <td>
+                    0%
+                </td>
+                <td>
+                    <textarea id="jd_rlzy_jdzfzr_desc" name="jd_rlzy_jdzfzr_desc"  jb_field="jb_single_save" ></textarea>
+                </td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>机电部</td>
+                <td>空调消防给排水设计1</td>
+                <td><SELECT type="text" id="jd_rlzy_ktxfjpssj1" name="jd_rlzy_ktxfjpssj1"  jb_dep="jd"  jb_field="jb_single_save" />
+                </td>
+                <td>
+                    <SELECT type="text" id="jd_rlzy_ktxfjpssj1_choose" name="jd_rlzy_ktxfjpssj1_choose"  jb_choose="50"  jb_field="jb_single_save" >
+                        <option value="0" >0</option>
+                        <option value="10">10</option>
+                        <option value="20">20</option>
+                        <option value="30">30</option>
+                        <option value="40">40</option>
+                        <option value="50" selected="selected">50</option>
+                    </select>
+                </td>
+                <td>
+                    <textarea id="jd_rlzy_ktxfjpssj1_desc" name="jd_rlzy_ktxfjpssj1_desc"  jb_field="jb_single_save" ></textarea>
+                </td>
+                <td><a opt="add" href="#" style="text-decoration:none">+</a>&nbsp;&nbsp;&nbsp;<a opt="del" href="#" style="text-decoration:none">-</a></td>
+            </tr>
+            <tr>
+                <td>机电部</td>
+                <td>空调消防给排水设计2</td>
+                <td><SELECT type="text" id="jd_rlzy_ktxfjpssj2" name="jd_rlzy_ktxfjpssj2"  jb_dep="jd"  jb_field="jb_single_save" />
+                </td>
+                <td>
+                    <SELECT type="text" id="jd_rlzy_ktxfjpssj2_choose" name="jd_rlzy_ktxfjpssj2_choose"  jb_choose="50"  jb_field="jb_single_save" >
+                        <option value="0" selected="selected">0</option>
+                        <option value="10">10</option>
+                        <option value="20">20</option>
+                        <option value="30">30</option>
+                        <option value="40">40</option>
+                        <option value="50">50</option>
+                    </select>
+                </td>
+                <td>
+                    <textarea id="jd_rlzy_ktxfjpssj2_desc" name="jd_rlzy_ktxfjpssj2_desc"  jb_field="jb_single_save" ></textarea>
+                </td>
+                <td><a opt="add" href="#" style="text-decoration:none">+</a>&nbsp;&nbsp;&nbsp;<a opt="del" href="#" style="text-decoration:none">-</a></td>
+            </tr>
+            <tr>
+                <td>机电部</td>
+                <td>空调消防给排水设计3</td>
+                <td><SELECT type="text" id="jd_rlzy_ktxfjpssj3" name="jd_rlzy_ktxfjpssj3"  jb_dep="jd"  jb_field="jb_single_save" />
+                </td>
+                <td>
+                    <SELECT type="text" id="jd_rlzy_ktxfjpssj3_choose" name="jd_rlzy_ktxfjpssj3_choose"  jb_choose="50"  jb_field="jb_single_save" >
+                        <option value="0" selected="selected">0</option>
+                        <option value="10">10</option>
+                        <option value="20">20</option>
+                        <option value="30">30</option>
+                        <option value="40">40</option>
+                        <option value="50">50</option>
+                    </select>
+                </td>
+                <td>
+                    <textarea id="jd_rlzy_ktxfjpssj3_desc" name="jd_rlzy_ktxfjpssj3_desc"  jb_field="jb_single_save" ></textarea>
+                </td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>机电部</td>
+                <td>电气设计1</td>
+                <td><SELECT type="text" id="jd_rlzy_dqsj1" name="jd_rlzy_dqsj1"  jb_dep="jd"  jb_field="jb_single_save" />
+                </td>
+                <td>
+                    <SELECT type="text" id="jd_rlzy_dqsj1_choose" name="jd_rlzy_dqsj1_choose"  jb_choose="50"  jb_field="jb_single_save" >
+                        <option value="0" >0</option>
+                        <option value="10">10</option>
+                        <option value="20">20</option>
+                        <option value="30">30</option>
+                        <option value="40">40</option>
+                        <option value="50" selected="selected">50</option>
+                    </select>
+                </td>
+                <td>
+                    <textarea id="jd_rlzy_dqsj1_desc" name="jd_rlzy_dqsj1_desc"  jb_field="jb_single_save" ></textarea>
+                </td>
+                <td><a opt="add" href="#" style="text-decoration:none">+</a>&nbsp;&nbsp;&nbsp;<a opt="del" href="#" style="text-decoration:none">-</a></td>
+            </tr>
+            <tr>
+                <td>机电部</td>
+                <td>电气设计2</td>
+                <td><SELECT type="text" id="jd_rlzy_dqsj2" name="jd_rlzy_dqsj2"  jb_dep="jd"  jb_field="jb_single_save" />
+                </td>
+                <td>
+                    <SELECT type="text" id="jd_rlzy_dqsj2_choose" name="jd_rlzy_dqsj2_choose"  jb_choose="50"  jb_field="jb_single_save" >
+                        <option value="0" selected="selected">0</option>
+                        <option value="10">10</option>
+                        <option value="20">20</option>
+                        <option value="30">30</option>
+                        <option value="40">40</option>
+                        <option value="50" >50</option>
+                    </select>
+                </td>
+                <td>
+                    <textarea id="jd_rlzy_dqsj2_desc" name="jd_rlzy_dqsj2_desc"  jb_field="jb_single_save" ></textarea>
+                </td>
+                <td><a opt="add" href="#" style="text-decoration:none">+</a>&nbsp;&nbsp;&nbsp;<a opt="del" href="#" style="text-decoration:none">-</a></td>
+            </tr>
+            <tr>
+                <td>机电部</td>
+                <td>电气设计3</td>
+                <td><SELECT type="text" id="jd_rlzy_dqsj3" name="jd_rlzy_dqsj3"  jb_dep="jd"  jb_field="jb_single_save" />
+                </td>
+                <td>
+                    <SELECT type="text" id="jd_rlzy_dqsj3_choose" name="jd_rlzy_dqsj3_choose"  jb_choose="50"  jb_field="jb_single_save" >
+                        <option value="0" selected="selected">0</option>
+                        <option value="10">10</option>
+                        <option value="20">20</option>
+                        <option value="30">30</option>
+                        <option value="40">40</option>
+                        <option value="50">50</option>
+                    </select>
+                </td>
+                <td>
+                    <textarea id="jd_rlzy_dqsj3_desc" name="jd_rlzy_dqsj3_desc"  jb_field="jb_single_save" ></textarea>
+                </td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>机电部</td>
+                <td>机电工长1</td>
+                <td><SELECT type="text" id="jd_rlzy_jdgz1" name="jd_rlzy_jdgz1"  jb_dep="jd"  jb_field="jb_single_save" />
+                </td>
+                <td>
+                    <SELECT type="text" id="jd_rlzy_jdgz1_choose" name="jd_rlzy_jdgz1_choose"  jb_choose="jd"  jb_field="jb_single_save" >
+                        <option value="0" >0</option>
+                        <option value="10">10</option>
+                        <option value="20">20</option>
+                        <option value="30">30</option>
+                        <option value="40">40</option>
+                        <option value="50">50</option>
+                        <option value="60">60</option>
+                        <option value="70">70</option>
+                        <option value="80">80</option>
+                        <option value="90">90</option>
+                        <option value="100" selected="selected">100</option>
+                    </select>
+                </td>
+                <td>
+                    <textarea id="jd_rlzy_jdgz1_desc" name="jd_rlzy_jdgz1_desc"  jb_field="jb_single_save" ></textarea>
+                </td>
+                <td><a opt="add" href="#" style="text-decoration:none">+</a>&nbsp;&nbsp;&nbsp;<a opt="del" href="#" style="text-decoration:none">-</a></td>
+            </tr>
+            <tr>
+                <td>机电部</td>
+                <td>机电工长2</td>
+                <td><SELECT type="text" id="jd_rlzy_jdgz2" name="jd_rlzy_jdgz2"  jb_dep="jd"  jb_field="jb_single_save" />
+                </td>
+                <td>
+                    <SELECT type="text" id="jd_rlzy_jdgz2_choose" name="jd_rlzy_jdgz2_choose"  jb_choose="jd"  jb_field="jb_single_save" >
+                        <option value="0" selected="selected">0</option>
+                        <option value="10">10</option>
+                        <option value="20">20</option>
+                        <option value="30">30</option>
+                        <option value="40">40</option>
+                        <option value="50">50</option>
+                        <option value="60">60</option>
+                        <option value="70">70</option>
+                        <option value="80">80</option>
+                        <option value="90">90</option>
+                        <option value="100" >100</option>
+                    </select>
+                </td>
+                <td>
+                    <textarea id="jd_rlzy_jdgz2_desc" name="jd_rlzy_jdgz2_desc"  jb_field="jb_single_save" ></textarea>
+                </td>
+                <td><a opt="add" href="#" style="text-decoration:none">+</a>&nbsp;&nbsp;&nbsp;<a opt="del" href="#" style="text-decoration:none">-</a></td>
+            </tr>
+            <tr>
+                <td>机电部</td>
+                <td>机电工长3</td>
+                <td><SELECT type="text" id="jd_rlzy_jdgz3" name="jd_rlzy_jdgz3"  jb_dep="jd"  jb_field="jb_single_save" />
+                </td>
+                <td>
+                    <SELECT type="text" id="jd_rlzy_jdgz3_choose" name="jd_rlzy_jdgz3_choose"  jb_choose="jd"  jb_field="jb_single_save" >
+                        <option value="0" selected="selected">0</option>
+                        <option value="10">10</option>
+                        <option value="20">20</option>
+                        <option value="30">30</option>
+                        <option value="40">40</option>
+                        <option value="50">50</option>
+                        <option value="60">60</option>
+                        <option value="70">70</option>
+                        <option value="80">80</option>
+                        <option value="90">90</option>
+                        <option value="100" >100</option>
+                    </select>
+                </td>
+                <td>
+                    <textarea id="jd_rlzy_jdgz3_desc" name="jd_rlzy_jdgz3_desc"  jb_field="jb_single_save" ></textarea>
+                </td>
+                <td></td>
+            </tr>
+            <!--机电部------------------------------------------------------------------------------------------------------------>
+            <!--采购部------------------------------------------------------------------------------------------------------------>
+            <tr>
+                <td>采购部</td>
+                <td>采购员1</td>
+                <td><SELECT type="text" id="cg_rlzy_cgr1" name="cg_rlzy_cgr1"  jb_dep="cg"  jb_field="jb_single_save" />
+                </td>
+                <td>
+                    <SELECT type="text" id="cg_rlzy_cgr1_choose" name="cg_rlzy_cgr1_choose"  jb_choose="cg"  jb_field="jb_single_save" >
+                        <option value="0" >0</option>
+                        <option value="10">10</option>
+                        <option value="20">20</option>
+                        <option value="30">30</option>
+                        <option value="40">40</option>
+                        <option value="50">50</option>
+                        <option value="60">60</option>
+                        <option value="70">70</option>
+                        <option value="80">80</option>
+                        <option value="90">90</option>
+                        <option value="100" selected="selected">100</option>
+                    </select>
+                </td>
+                <td>
+                    <textarea id="cg_rlzy_cgr1_desc" name="cg_rlzy_cgr1_desc"  jb_field="jb_single_save" ></textarea>
+                </td>
+                <td><a opt="add" href="#" style="text-decoration:none">+</a>&nbsp;&nbsp;&nbsp;<a opt="del" href="#" style="text-decoration:none">-</a></td>
+            </tr>
+            <tr>
+                <td>采购部</td>
+                <td>采购员2</td>
+                <td><SELECT type="text" id="cg_rlzy_cgr2" name="cg_rlzy_cgr2"  jb_dep="cg"  jb_field="jb_single_save" />
+                </td>
+                <td>
+                    <SELECT type="text" id="cg_rlzy_cgr2_choose" name="cg_rlzy_cgr2_choose"  jb_choose="cg"  jb_field="jb_single_save" >
+                        <option value="0" selected="selected">0</option>
+                        <option value="10">10</option>
+                        <option value="20">20</option>
+                        <option value="30">30</option>
+                        <option value="40">40</option>
+                        <option value="50">50</option>
+                        <option value="60">60</option>
+                        <option value="70">70</option>
+                        <option value="80">80</option>
+                        <option value="90">90</option>
+                        <option value="100" >100</option>
+                    </select>
+                </td>
+                <td>
+                    <textarea id="cg_rlzy_cgr2_desc" name="cg_rlzy_cgr2_desc"  jb_field="jb_single_save" ></textarea>
+                </td>
+                <td></td>
+            </tr>
+            </tbody>
+            <!--采购部------------------------------------------------------------------------------------------------------------>
+        </table>
+    </div>
+</div>

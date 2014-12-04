@@ -1,0 +1,749 @@
+<script type="text/javascript">
+    $(document).ready(function() {
+        function checkOnlyOne(event){
+            var cur_id = event.target.id;
+            var $cur_sel = $("#" + cur_id);
+            var $cur_sel_text = $cur_sel.find('option:selected').text();
+            //alert($cur_sel.val());
+            //alert($cur_sel.find('option:selected').text());
+            var $table = $cur_sel.parent().parent().parent().parent();
+            var table_id = $table.attr("id");
+            //alert(table_id);
+            var $tb = $("#" + table_id + " td:contains(\"" + $cur_sel_text + "\")");
+            //console.log($tb);
+            //alert($tb);
+            if($tb.length >=2){
+                alert("已有改选项，请重新选择!");
+                $cur_sel.val(0);
+            }
+        }
+        function getColModel_Id(){
+            return {name:'id',index:'id',
+                width:20,align:"right",
+                sortable:true,
+                editable:false,
+                readonly:true,
+                editoptions:{readonly:true,size:20},
+                formoptions:{rowpos:1, label: "id", elmprefix:"(*)"}
+            };
+        }
+        function getColModel_Je(indexname,rowpos,label,require){
+            return {
+                name:indexname,
+                index:indexname,
+                width:20,
+                align:"right",
+                sortable:true,
+                editable:true, edittype:"text",
+                editrules:{required: (typeof(require )== "undefined") ? true : require},
+                editoptions:{
+                    size:"20"
+                },
+                formoptions:{rowpos:rowpos, label: label, elmprefix:"(*)"}
+            };
+        }
+        function getColModel_Time(indexname,rowpos,label,require){
+            return {
+                name:indexname,
+                index:indexname,
+                width:20,
+                align:"right",
+                sortable:true,
+                editable:true, edittype:"text",
+                editrules:{required: (typeof(require )== "undefined") ? true : require},
+                editoptions:{
+                    dataInit:function(element){
+                        $(element).datepicker();
+                    },
+                    size:"20"
+                },
+                formoptions:{rowpos:rowpos, label: label, elmprefix:"(*)"}
+            };
+        }
+        //sksj
+        function setZjlglSksjJqGrid(domTableId,domPageId,cur_pro_id,cur_user_id,cur_dep_id){
+            var    caption_str = "收款实计";
+            var    search_url = '/index.php/Home/AllInOne/ajaxZjlsksjSearch';
+            var    save_url = '/index.php/Home/AllInOne/ajaxZjlsksjSave'
+            var    colNames = ['ID','笔数','金额','时间'];
+            //
+            var $zjlsksjgridobj = jQuery(domTableId).jqGrid({
+                url: search_url,
+                datatype: "json",
+                mtype: 'POST',
+                postData: {pro_id:cur_pro_id},
+                colNames: colNames,
+                colModel:[
+                    getColModel_Id()
+                    ,
+                    {
+                        name: "sk_bs",
+                        index: "sk_bs",
+                        width:20,
+                        align:"right",
+                        sortable:true,
+                        stype:'select',//查询类型
+                        editable:true,edittype:"select",
+                        editoptions:{
+                            value:{
+                                '0':'全部',
+                                '0.1':'首付款',
+                                '2':'第2笔',
+                                '3':'第3笔',
+                                '4':'第4笔',
+                                '5':'第5笔',
+                                '6':'第6笔',
+                                '7':'第7笔',
+                                '8':'第8笔',
+                                '9':'竣工款',
+                                '10':'第10笔',
+                                '11':'第11笔',
+                                '12':'第12笔',
+                                '40':'质保金'
+                            },
+                            defaultValue:"0",
+                            dataEvents: [
+                                {
+                                    type: 'change', //change 下拉选择的时候
+                                    fn: checkOnlyOne
+                                }
+                            ]
+                        },
+                        editrules:{required:true},
+                        formoptions:{ rowpos:2,label: "笔数" ,elmprefix:"(*)"}
+                    }
+                    ,
+                    //getColModel_Je("sk_je",3,"金额")
+                    {
+                        name:"sk_je",
+                        index:"sk_je",
+                        width:20,
+                        align:"right",
+                        sortable:true,
+                        editable:true, edittype:"text",
+                        editrules:{required: (typeof(require )== "undefined") ? true : require},
+                        editoptions:{
+                            size:"20"
+                        },
+                        formatter: 'number',
+                        summaryType:'sum',
+                        formoptions:{rowpos:3, label: "金额", elmprefix:"(*)"}
+                    }
+                    ,
+                    getColModel_Time("sk_time",4,"日期")
+                ],
+                hiddengrid: false,
+                autowidth: true,
+                rownumbers: true,
+                rowNum:20,
+                rowList:[20,30,50],
+                pager: domPageId,
+                viewrecords: true,
+                sortorder: "asc",
+                forceFit : true,
+                editurl: save_url,
+                caption:caption_str,
+                footerrow : true,
+                //userDataOnFooter : true,
+                //altRows : true,
+                gridComplete: function() {
+                    var rowNum = parseInt(jQuery(domTableId).jqGrid('getGridParam','records',10));
+                    if(rowNum > 0){
+                        var sk_je  = jQuery(domTableId).jqGrid('getCol','sk_je',false,'sum');
+                        jQuery(domTableId).jqGrid('footerData',"set",{sk_bs:'合计:',sk_je:sk_je});
+                        $("#span_custom_hetong_dzje").text(sk_je);
+                    }
+                },
+                onSelectRow: function(id){
+                },
+                onCellSelect: function(){
+                    //alert("cellselect");
+                },
+                afterInsertRow:function(rowid,rowdata,rowelem){
+                    //alert(rowid);
+                }
+            });
+
+            //导航栏配置和CRUD函数
+            if(cur_dep_id == "ht"){
+                jQuery(domTableId).jqGrid('navGrid',domPageId,
+                        {view:true,search:false,edit:false,add:false,del:true}
+                );
+            }else{
+                jQuery(domTableId).jqGrid('navGrid',domPageId,
+                        {view:true,search:false,edit:false,add:false,del:false}
+                );
+            }
+            //
+            var addparameters = {
+                rowID : "new_row",
+                initdata : {},
+                position :"first",
+                useDefValues : false,
+                useFormatter : false,
+                addRowParams : {
+                    extraparam:{pro_id:cur_pro_id,user_id:cur_user_id},
+                    successfunc : function(xhr){
+                        var result = eval('(' + xhr.responseText + ')');
+                        if(true == result.state){
+                            jQuery(domTableId).trigger("reloadGrid");
+                            return true;
+                        }else{
+                            jAlert(result.msg);
+                            return true;
+                        }
+                    }
+                }
+            }
+            //
+            var editparameters = {
+                "keys" : false,
+                "oneditfunc" : null,
+                "successfunc" : function(xhr){
+                    var result = eval('(' + xhr.responseText + ')');
+                    if(true == result.state){
+                        jQuery(domTableId).trigger("reloadGrid");
+                        return true;
+                    }else{
+                        jAlert(result.msg);
+                        return true;
+                    }
+                },
+                "url" : null,
+                "extraparam" : {pro_id:cur_pro_id,user_id:cur_user_id},
+                "aftersavefunc" : null,
+                "errorfunc": null,
+                "afterrestorefunc" : null,
+                "restoreAfterError" : true,
+                "mtype" : "POST"
+            }
+            var parameters = {
+                edit: true,
+                editicon: "ui-icon-pencil",
+                add: true,
+                addicon:"ui-icon-plus",
+                save: true,
+                saveicon:"ui-icon-disk",
+                cancel: true,
+                cancelicon:"ui-icon-cancel",
+                addParams : addparameters,
+                editParams : editparameters
+            }
+
+            if(cur_dep_id == "ht"){
+                jQuery(domTableId).jqGrid('inlineNav',domPageId,parameters);
+            }
+            //其他配置
+            jQuery(domTableId).jqGrid('gridResize',{minWidth:1500,maxWidth:2000,minHeight:500, maxHeight:1000});
+            jQuery(domTableId).jqGrid('sortableRows');
+        }
+        setZjlglSksjJqGrid("#zjlsksj","#pzjlsksj",$("#pro_id").val(),$("#user_id").val(),$("#user_department").val());
+        //skyj
+        function setZjlgl_Skyj_JqGrid(domTableId,domPageId,cur_pro_id,cur_user_id,cur_dep_id,cur_ht_amt){
+            var caption_str = "收款预计";
+            var search_url = '/index.php/Home/AllInOne/ajaxZjlskyjSearch';
+            var save_url = '/index.php/Home/AllInOne/ajaxZjlskyjSave';
+            var colNames = ['ID','笔数','比例','金额','时间'];
+            //
+            var $zjlskyjgridobj = jQuery(domTableId).jqGrid({
+                url: search_url,
+                datatype: "json",
+                mtype: 'POST',
+                postData: {pro_id:cur_pro_id,hetong_amt:cur_ht_amt},
+                colNames: colNames,
+                colModel:[
+                    getColModel_Id()
+                    ,
+                    {
+                        name: "sk_bs",
+                        index: "sk_bs",
+                        width:20,
+                        align:"center",
+                        sortable:true,
+                        stype:'select',//查询类型
+                        editable:true,edittype:"select",
+                        editoptions:{
+                            value:{
+                                '0':'全部',
+                                '0.1':'首付款',
+                                '1':'进度款1',
+                                '2':'进度款2',
+                                '3':'进度款3',
+                                '4':'进度款4',
+                                '5':'进度款5',
+                                '6':'进度款6',
+                                '7':'进度款7',
+                                '8':'进度款8',
+                                '20':'竣工款',
+                                '30':'结算款',
+                                '40':'质保金'
+                            },
+                            defaultValue:"0",
+                            dataEvents: [
+                                {
+                                    type: 'change', //change 下拉选择的时候
+                                    fn: checkOnlyOne
+                                }
+                            ]
+                        },
+                        editrules:{required:true},
+                        formoptions:{ rowpos:2,label: "笔数" ,elmprefix:"(*)"}
+                    }
+                    ,
+                    getColModel_Je("sk_rate",3,"比例")
+                    ,
+                    //getColModel_Je("sk_je",4,"金额",false)
+                    {
+                        name:"sk_je",
+                        index:"sk_je",
+                        width:20,
+                        align:"right",
+                        sortable:true,
+                        editable:true, edittype:"text",
+                        editrules:{required: false},
+                        editoptions:{
+                            size:"20"
+                        },
+                        formatter: 'number',
+                        summaryType:'sum',
+                        formoptions:{rowpos:4, label: "金额", elmprefix:"(*)"}
+                    }
+                    ,
+                    getColModel_Time("sk_time",4,"日期")
+                ],
+                hiddengrid: false,
+                autowidth: true,
+                rownumbers: true,
+                rowNum:20,
+                rowList:[20,30,50],
+                pager: domPageId,
+                viewrecords: true,
+                sortorder: "asc",
+                forceFit : true,
+                editurl: save_url,
+                caption:caption_str,
+                footerrow : true,
+                userDataOnFooter : true,
+                altRows : true,
+                gridComplete: function() {
+                    var rowNum = parseInt(jQuery(domTableId).jqGrid('getGridParam','records',10));
+                    if(rowNum > 0){
+                        var sk_je  = jQuery(domTableId).jqGrid('getCol','sk_je',false,'sum');
+                        jQuery(domTableId).jqGrid('footerData',"set",{sk_rate:'合计:',sk_je:sk_je});
+                    }
+                },
+                onSelectRow: function(id){
+                    //
+                },
+                onCellSelect: function(){
+                    //alert("cellselect");
+                },
+                afterInsertRow:function(rowid,rowdata,rowelem){
+                    //alert(rowid);
+                }
+            });
+
+            //导航栏配置和CRUD函数
+            if(cur_dep_id == "gc"){
+                jQuery(domTableId).jqGrid('navGrid',domPageId,
+                        {view:true,search:false,edit:false,add:false,del:true}
+                );
+            }else{
+                jQuery(domTableId).jqGrid('navGrid',domPageId,
+                        {view:true,search:false,edit:false,add:false,del:false}
+                );
+            }
+            //
+            var addparameters = {
+                rowID : "new_row",
+                initdata : {},
+                position :"first",
+                useDefValues : false,
+                useFormatter : false,
+                addRowParams : {
+                    extraparam:{pro_id:cur_pro_id,user_id:cur_user_id},
+                    successfunc : function(xhr){
+                        var result = eval('(' + xhr.responseText + ')');
+                        if(true == result.state){
+                            jQuery(domTableId).trigger("reloadGrid");
+                            return true;
+                        }else{
+                            jAlert(result.msg);
+                            return true;
+                        }
+                    }
+                }
+            }
+            //
+            var editparameters = {
+                "keys" : false,
+                "oneditfunc" : null,
+                "successfunc" : function(xhr){
+                    var result = eval('(' + xhr.responseText + ')');
+                    if(true == result.state){
+                        jQuery(domTableId).trigger("reloadGrid");
+                        return true;
+                    }else{
+                        jAlert(result.msg);
+                        return true;
+                    }
+                },
+                "url" : null,
+                "extraparam" : {pro_id:cur_pro_id,user_id:cur_user_id,hetong_amt:cur_ht_amt},
+                "aftersavefunc" : null,
+                "errorfunc": null,
+                "afterrestorefunc" : null,
+                "restoreAfterError" : true,
+                "mtype" : "POST"
+            }
+            var parameters = {
+                edit: true,
+                editicon: "ui-icon-pencil",
+                add: true,
+                addicon:"ui-icon-plus",
+                save: true,
+                saveicon:"ui-icon-disk",
+                cancel: true,
+                cancelicon:"ui-icon-cancel",
+                addParams : addparameters,
+                editParams : editparameters
+            }
+
+            if(cur_dep_id == "gc"){
+                jQuery(domTableId).jqGrid('inlineNav',domPageId,parameters);
+            }
+            //其他配置
+            jQuery(domTableId).jqGrid('gridResize',{minWidth:1500,maxWidth:2000,minHeight:500, maxHeight:1000});
+            jQuery(domTableId).jqGrid('sortableRows');
+        }
+        setZjlgl_Skyj_JqGrid("#zjlskyj","#pzjlskyj",$("#pro_id").val(),$("#user_id").val(),$("#user_department").val(),$("#ys_hetong_amt").val());
+        //fkyj --------------------------------------------------------------------------------------------------------------
+        function setZjlgl_Fkyj_JqGrid(domTableId,domPageId,cur_pro_id,cur_user_id,cur_dep_id,cur_fb_amt,cur_cl_amt){
+            var caption_str = "付款预计";
+            var search_url = '/index.php/Home/AllInOne/ajaxZjlfkyjSearch';
+            var save_url = '/index.php/Home/AllInOne/ajaxZjlfkyjSave';
+            var colNames = ['ID','笔数','预计付款占分包合同比例','分包付款金额','预计付款占材料合同比例','材料付款金额','时间'];
+            //
+            var $zjlskyjgridobj = jQuery(domTableId).jqGrid({
+                url: search_url,
+                datatype: "json",
+                mtype: 'POST',
+                postData: {pro_id:cur_pro_id,fb_amt:cur_fb_amt,cl_amt:cur_cl_amt},
+                colNames: colNames,
+                colModel:[
+                    getColModel_Id()
+                    ,
+                    {
+                        name: "fk_bs",
+                        index: "fk_bs",
+                        width:30,
+                        align:"center",
+                        sortable:true,
+                        stype:'select',//查询类型
+                        editable:true,edittype:"select",
+                        editoptions:{
+                            value:{
+                                '0':'全部',
+                                '0.1':'首付款',
+                                '1':'进度款1：开工第2月',
+                                '2':'进度款2：开工第3月',
+                                '3':'进度款3：开工第4月',
+                                '4':'进度款4：开工第5月',
+                                '5':'进度款5：开工第6月',
+                                '6':'进度款6：开工第7月',
+                                '7':'进度款7：开工第8月',
+                                '8':'进度款8：开工第9月',
+                                '20':'竣工结算款',
+                                '30':'竣工结算款次月',
+                                '40':'质保金'
+                            },
+                            defaultValue:"0",
+                            dataEvents: [
+                                {
+                                    type: 'change', //change 下拉选择的时候
+                                    fn: checkOnlyOne
+                                }
+                            ]
+                        },
+                        editrules:{required:true},
+                        formoptions:{ rowpos:2,label: "笔数" ,elmprefix:"(*)"}
+                    }
+                    ,
+                    getColModel_Je("fk_fb_rate_gc",3,"预计付款占分包合同比例",false)
+                    ,
+                    {
+                        name:"fk_fb_je",
+                        index:"fk_fb_je",
+                        width:20,
+                        align:"right",
+                        sortable:true,
+                        editable:true, edittype:"text",
+                        editrules:{required: false},
+                        editoptions:{
+                            size:"20"
+                        },
+                        formatter: 'number',
+                        summaryType:'sum',
+                        formoptions:{rowpos:4, label: "分包付款金额", elmprefix:"(*)"}
+                    }
+                    ,
+                    getColModel_Je("fk_cl_rate_cg",5,"预计付款占材料合同比例",false)
+                    ,
+                    {
+                        name:"fk_cl_je",
+                        index:"fk_cl_je",
+                        width:20,
+                        align:"right",
+                        sortable:true,
+                        editable:true, edittype:"text",
+                        editrules:{required: false},
+                        editoptions:{
+                            size:"20"
+                        },
+                        formatter: 'number',
+                        summaryType:'sum',
+                        formoptions:{rowpos:6, label: "材料付款金额", elmprefix:"(*)"}
+                    }
+                    ,
+                    getColModel_Time("fk_time",7,"日期")
+
+                ],
+                hiddengrid: false,
+                autowidth: true,
+                rownumbers: true,
+                rowNum:20,
+                rowList:[20,30,50],
+                pager: domPageId,
+                viewrecords: true,
+                sortorder: "asc",
+                forceFit : true,
+                editurl: save_url,
+                caption:caption_str,
+                footerrow : true,
+                userDataOnFooter : true,
+                altRows : true,
+                gridComplete: function() {
+                    var rowNum = parseInt(jQuery(domTableId).jqGrid('getGridParam','records',10));
+                    if(rowNum > 0){
+                        var fk_fb_je  = jQuery(domTableId).jqGrid('getCol','fk_fb_je',false,'sum');
+                        var fk_cl_je  = jQuery(domTableId).jqGrid('getCol','fk_cl_je',false,'sum');
+                        jQuery(domTableId).jqGrid('footerData',"set",{fk_fb_rate:'合计:',fk_fb_je:fk_fb_je,fk_cl_je:fk_cl_je});
+                    }
+                },
+                onSelectRow: function(id){
+                    //
+                },
+                onCellSelect: function(){
+                    //alert("cellselect");
+                },
+                afterInsertRow:function(rowid,rowdata,rowelem){
+                    //alert(rowid);
+                }
+            });
+
+            //导航栏配置和CRUD函数
+            if(cur_dep_id == "gc" || cur_dep_id == "cg"){
+                jQuery(domTableId).jqGrid('navGrid',domPageId,
+                        {view:true,search:false,edit:false,add:false,del:true}
+                );
+            }else{
+                jQuery(domTableId).jqGrid('navGrid',domPageId,
+                        {view:true,search:false,edit:false,add:false,del:false}
+                );
+            }
+            //
+            var addparameters = {
+                rowID : "new_row",
+                initdata : {},
+                position :"first",
+                useDefValues : false,
+                useFormatter : false,
+                addRowParams : {
+                    extraparam:{pro_id:cur_pro_id,user_id:cur_user_id},
+                    successfunc : function(xhr){
+                        var result = eval('(' + xhr.responseText + ')');
+                        if(true == result.state){
+                            jQuery(domTableId).trigger("reloadGrid");
+                            return true;
+                        }else{
+                            jAlert(result.msg);
+                            return true;
+                        }
+                    }
+                }
+            }
+            //
+            var editparameters = {
+                "keys" : false,
+                "oneditfunc" : function(rowid){
+                    //alert(rowid);
+                    var dep_sx = $("#user_department").val();
+                    //alert(dep_sx);
+                    var $cur_all_text = $("#zjlfkyj :text" );
+                    //console.log($cur_all_text);
+                    $cur_all_text.each(function(index,elem){
+                        //alert(elem);
+                        //console.log(elem);
+                        var $cur_sel = $(elem);
+                        var cur_name = $cur_sel.attr("name");
+                        //alert(cur_name);
+                        if(cur_name.indexOf(dep_sx) != -1){
+                            //cur dep ok. can edit.
+                        }else{
+                            if("fk_time" != cur_name){
+                                $cur_sel.attr("disabled",true);
+                                $cur_sel.attr("readonly",true);
+                            }
+                        }
+                    });
+                },
+                "successfunc" : function(xhr){
+                    var result = eval('(' + xhr.responseText + ')');
+                    if(true == result.state){
+                        jQuery(domTableId).trigger("reloadGrid");
+                        return true;
+                    }else{
+                        jAlert(result.msg);
+                        return true;
+                    }
+                },
+                "url" : null,
+                "extraparam" : {pro_id:cur_pro_id,user_id:cur_user_id,fb_amt:cur_fb_amt,cl_amt:cur_cl_amt},
+                "aftersavefunc" : null,
+                "errorfunc": null,
+                "afterrestorefunc" : null,
+                "restoreAfterError" : true,
+                "mtype" : "POST"
+            }
+            var parameters = {
+                edit: true,
+                editicon: "ui-icon-pencil",
+                add: true,
+                addicon:"ui-icon-plus",
+                save: true,
+                saveicon:"ui-icon-disk",
+                cancel: true,
+                cancelicon:"ui-icon-cancel",
+                addParams : addparameters,
+                editParams : editparameters
+            }
+
+            if(cur_dep_id == "gc" || cur_dep_id == "cg"){
+                jQuery(domTableId).jqGrid('inlineNav',domPageId,parameters);
+            }
+            //其他配置
+            jQuery(domTableId).jqGrid('gridResize',{minWidth:1500,maxWidth:2000,minHeight:500, maxHeight:1000});
+            jQuery(domTableId).jqGrid('sortableRows');
+        }
+        //get fb and cg hetong sjcb
+        function get_cbgl_all_zje(){
+            var ret = $.get("/index.php/Home/DbOpt/ajaxGetCbglAllZje?pro_id=" + $("#pro_id").val(), function(xhr){
+                console.log(xhr);
+                setZjlgl_Fkyj_JqGrid("#zjlfkyj","#pzjlfkyj",$("#pro_id").val(),$("#user_id").val(),$("#user_department").val(),xhr.fb_sjcb,xhr.cg_sjcb);
+                $("#span_hetong_js_zje").text(xhr.dwbj + xhr.customer_vo);
+                $("#span_fb_hetong_zje").text(xhr.fb_sjcb + xhr.fb_self_vo);
+                $("#span_cg_hetong_zje").text(xhr.cg_sjcb + xhr.cg_self_vo);
+                var ret_fusion = $.get("/index.php/Home/Fusion/ajaxGetMonthZjl?pro_id=" + $("#pro_id").val() + "&hetong_amt=" + $("#ys_hetong_amt").val() + "&fb_amt=" + xhr.fb_sjcb + "&cl_amt=" + xhr.cg_sjcb, function(response){
+                    var zjlChart = new FusionCharts( "__PUBLIC__/js/Lib/FusionCharts/Charts/MSLine.swf",// MSLine.swf Line.swf,MSColumn2D.swf  MSBar2D.swf
+                            "zjlChartId", "1400", "500", "0", "1" );
+                    zjlChart.setJSONData({
+                        "chart":
+                        {
+                            "caption": "项目资金流月份统计",
+                            "showlabels": "1",
+                            "showvalues": "1",
+                            "decimals": "0",
+                            "numberprefix": "",
+                            "placevaluesinside": "1",
+/*                            "rotatevalues": "1",*/
+                            "basefont":"Arial",
+                            "basefontsize":"15",
+                            "basefontcolor":"000000"
+/*                            ,
+                            "xAxisName" : "月份",
+                            "yAxisName" : "金额"*/
+                        },
+                        "categories":response.categories,
+                        "dataset" :response.dataset
+                    });
+                    zjlChart.render("zjlchartContainer");
+                });
+            });
+            return ret;
+        }
+        //jquery promise init.
+        $.when(get_cbgl_all_zje())
+                .done(function(){
+                    //
+                    var all_je = parseFloat($("#span_hetong_js_zje").text());
+                    var dz_je = parseFloat($("#span_custom_hetong_dzje").text());
+                    var dz_rate = Math.round((dz_je/all_je)*10000)/100;
+                    $("#span_custom_hetong_dzje_rate").text(' ' + dz_rate + '%');
+
+                });
+    });
+</script>
+<div id="module_xmzjlgl"  class="module">
+    <h3><a href="#">项目资金流管理</a></h3>
+    <div>
+        <div>
+            <!--
+            项目合同金额	来自预算部	客户合同到账金额
+            项目结算金额	来自预算部	客户合同到账金额占结算金额比例
+            -->
+            <table jb_table="bordered">
+                <tr >
+                    <td>项目合同金额：</td>
+                    <td>
+                        {$ys_hetong_amt}
+                    </td>
+                    <td>客户合同到账金额:</td>
+                    <td>
+                        <span id="span_custom_hetong_dzje"></span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>项目结算金额：</td>
+                    <td>
+                        <span id="span_hetong_js_zje"></span>
+                    </td>
+                    <td>客户合同到账金额占结算金额比例:</td>
+                    <td>
+                        <span id="span_custom_hetong_dzje_rate"></span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>分包合同总金额：</td>
+                    <td>
+                        <span id="span_fb_hetong_zje"></span>
+                    </td>
+                    <td>采购合同总金额：</td>
+                    <td>
+                        <span id="span_cg_hetong_zje"></span>
+                    </td>
+                </tr>
+            </table>
+            <br>
+        </div>
+        <div>
+            <table id="zjlsksj"></table>
+            <div id="pzjlsksj"></div>
+        </div>
+        <br>
+        <div>
+            <table id="zjlskyj"></table>
+            <div id="pzjlskyj"></div>
+        </div>
+        <br>
+        <div>
+            <table id="zjlfkyj"></table>
+            <div id="pzjlfkyj"></div>
+        </div>
+        <br>
+        <br>
+        <div>
+            <div id="zjlchartContainer">FusionCharts XT will load here!</div>
+        </div>
+    </div>
+
+</div>

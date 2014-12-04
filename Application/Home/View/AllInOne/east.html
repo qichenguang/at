@@ -1,0 +1,98 @@
+<script type="text/javascript">
+    $(document).ready(function() {
+        PNotify.prototype.options.styling = "jqueryui";
+        function getNotify() {
+            var depsx = $("#user_department").val();
+            $.get("/index.php/Home/Alert/ajaxNotify?depsx=" + depsx, function(result){
+                //console.log(xhr);
+                //alert(xhr.responseText);
+                //var result = eval('(' + xhr.responseText + ')');
+                //console.log(result);
+                if(true == result.state && result.count > 0){
+                    //alert(result.msg);
+/*                    new PNotify({
+                        title: 'Oh No!',
+                        text: result.msg,
+                        type: 'error'
+                    });*/
+/*                    new PNotify({
+                        title: 'jQuery UI Icon Error',
+                        text: 'Oh no. Something\'s wrong with your network, and I\'m showing you visually using an appropriate icon to indicate the type of error that has occured. You know, network.',
+                        type: 'error',
+                        icon: 'ui-icon ui-icon-signal-diag'
+                    });*/
+/*                    var notice = new PNotify({
+                        title: 'Click Close Notice',
+                        text: result.msg,
+                        buttons: {
+                            closer: true,
+                            sticker: true
+                        },
+                        type: 'error',
+                        icon: 'ui-icon ui-icon-signal-diag'
+                    });
+                    notice.get().click(function() {
+                        notice.remove();
+                    });*/
+/*                    new PNotify({
+                        title: 'Permanent Buttons Notice',
+                        text: 'My buttons are really lonely, so they\'re gonna hang out with us.',
+                        buttons: {
+                            closer_hover: false,
+                            sticker_hover: false
+                        }
+                    });*/
+                    (new PNotify({
+                        title: result.msg,
+                        text: '查看报警?',
+                        icon: 'glyphicon glyphicon-question-sign',
+                        hide: false,
+                        confirm: {
+                            confirm: true
+                        },
+                        buttons: {
+                            closer: true,
+                            sticker: true
+                        },
+                        history: {
+                            history: false
+                        }
+                    })).get().on('pnotify.confirm', function() {
+                                //alert('Ok, cool.');
+                                $("#west_alert_search").button().click();
+                            }).on('pnotify.cancel', function() {
+                                //alert('Oh ok. Chicken, I see.');
+                            });
+                    return true;
+                }else{
+                    return true;
+                }
+            });
+        }
+
+        function getNotify2() {
+            PNotify.prototype.options.styling = "jqueryui";
+                       new PNotify({
+     title: 'Permanent Buttons Notice',
+     text: 'My buttons are really lonely, so they\'re gonna hang out with us.',
+     buttons: {
+     closer_hover: false,
+     sticker_hover: false,
+         closer:true,
+         sticker:true
+     }
+        });
+        }
+        //setInterval(getNotify, 2000);
+        setTimeout(getNotify, 1000);
+        //----------------------------------------------------------------------------
+
+    });
+</script>
+<div>
+    <div>
+        <INPUT type="hidden" id="user_department" name="user_department" value="{$user_department}" >
+    </div>
+</div>
+
+

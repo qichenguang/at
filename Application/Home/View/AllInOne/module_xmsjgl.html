@@ -1,0 +1,331 @@
+<script type="text/javascript">
+    $(document).ready(function() {
+        //get vo
+        function get_sjgl_all_nodes(pro_id){
+            var ret = $.get("/index.php/Home/Fusion/ajaxGetSjgl?pro_id=" + $("#pro_id").val(), function(xhr){
+                console.log(xhr);
+                var sjglChart = new FusionCharts( "__PUBLIC__/js/Lib/FusionCharts/Charts/Line.swf",//MSColumn2D  Line  Column2D
+                        "sjglChartId", "1400", "500", "0", "1" );
+                sjglChart.setJSONData( {
+                    "chart":
+                    {
+                        "caption" : "项目时间偏差波形图" ,
+                        "xAxisName" : "时间里程碑",
+                        "yAxisName" : "天数",
+                        "numberPrefix" : "",
+                        "rotateNames" : 1,
+                        "basefont":"Arial",
+                        "basefontsize":"15",
+                        "basefontcolor":"000000"
+                    },
+                    "data" : xhr
+                } );
+                sjglChart.render("sjglchartContainer");
+            });
+            return ret;
+        }
+        //jquery promise init.
+        $.when(get_sjgl_all_nodes())
+                .done(function(){
+                    //
+                });
+
+    });
+</script>
+
+<div id="module_xmsjgl"  class="module">
+    <h3><a href="#">项目时间管理</a></h3>
+    <div>
+<!--     项目时间管理
+        项目里程牌	计划项目实施时间	实际项目实施时间	说明	编程说明
+        发标日期		来自市场部	可输入文字说明
+        设计方案提交日期		来自设计部	可输入文字说明
+        机电方案提交日期		来自机电部	可输入文字说明
+        回标日期		来自市场部	可输入文字说明
+        中标日期		来自市场部	可输入文字说明
+        合同签订日期		来自市场部	可输入文字说明
+-->
+        <table jb_table="bordered">
+            <tr >
+                <td>发标日期：</td>
+                <td><INPUT type="text" id="sc_fb_time" name="sc_fb_time"  jb_time_field="" jb_field="jb_single_save" /></td>
+                <td>说明:</td>
+                <td>
+                    <textarea id="sc_fb_time_desc" name="sc_fb_time_desc"  jb_field="jb_single_save" cols="50" rows="1"></textarea>
+                </td>
+            </tr>
+            <tr>
+                <td>设计方案提交日期：</td>
+                <td><INPUT type="text" id="sj_sjfatj_time" name="sj_sjfatj_time"  jb_time_field="" jb_field="jb_single_save" /></td>
+                <td>说明:</td>
+                <td>
+                    <textarea id="sj_sjfatj_time_desc" name="sj_sjfatj_time_desc"  jb_field="jb_single_save" cols="50" rows="1"></textarea>
+                </td>
+            </tr>
+            <tr>
+                <td>机电方案提交日期：</td>
+                <td><INPUT type="text" id="jd_jdfatj_time" name="jd_jdfatj_time"  jb_time_field="" jb_field="jb_single_save" /></td>
+                <td>说明:</td>
+                <td>
+                    <textarea id="jd_jdfatj_time_desc" name="jd_jdfatj_time_desc"  jb_field="jb_single_save" cols="50" rows="1"></textarea>
+                </td>
+            </tr>
+            <tr>
+                <td>回标日期：</td>
+                <td><INPUT type="text" id="sc_hb_time" name="sc_hb_time"  jb_time_field="" jb_field="jb_single_save" /></td>
+                <td>说明:</td>
+                <td>
+                    <textarea id="sc_hb_time_desc" name="sc_hb_time_desc"  jb_field="jb_single_save" cols="50" rows="1"></textarea>
+                </td>
+            </tr>
+            <tr>
+                <td>中标日期：</td>
+                <td><INPUT type="text" id="sc_zb_time" name="sc_zb_time"  jb_time_field="" jb_field="jb_single_save" /></td>
+                <td>说明:</td>
+                <td>
+                    <textarea id="sc_zb_time_desc" name="sc_zb_time_desc"  jb_field="jb_single_save" cols="50" rows="1"></textarea>
+                </td>
+            </tr>
+            <tr>
+                <td>合同签订日期：</td>
+                <td><INPUT type="text" id="sc_htqd_time" name="sc_htqd_time"  jb_time_field="" jb_field="jb_single_save" /></td>
+                <td>说明:</td>
+                <td>
+                    <textarea id="sc_htqd_time_desc" name="sc_htqd_time_desc"  jb_field="jb_single_save" cols="50" rows="1"></textarea>
+                </td>
+            </tr>
+        </table>
+        <br>
+        <table jb_table="bordered">
+            <thead>
+            <tr>
+                <th>项目里程牌</th>
+                <th>计划项目实施时间</th>
+                <th>实际项目实施时间</th>
+                <th>说明</th>
+            </tr>
+            </thead>
+            <!--项目里程牌------------------------------------------------------------------------------------------------------------>
+            <tr>
+                <td>设计报批图提交日期</td>
+                <td></td>
+                <td><INPUT type="text" id="sj_sjbpttj_time" name="sj_sjbpttj_time"  jb_time_field="" jb_field="jb_single_save" /></td>
+                <td>
+                    <textarea id="sj_sjbpttj_time_desc" name="sj_sjbpttj_time_desc"  jb_field="jb_single_save" cols="50" rows="1"></textarea>
+                </td>
+            </tr>
+            <tr>
+                <td>机电报批图提交日期</td>
+                <td></td>
+                <td><INPUT type="text" id="jd_jdbpttj_time" name="jd_jdbpttj_time"  jb_time_field="" jb_field="jb_single_save" /></td>
+                <td>
+                    <textarea id="jd_jdbpttj_time_desc" name="jd_jdbpttj_time_desc"  jb_field="jb_single_save" cols="50" rows="1"></textarea>
+                </td>
+            </tr>
+            <tr>
+                <td>大厦报批提交日期</td>
+                <td><INPUT type="text" id="gc_dsbptj_jh_time" name="gc_dsbptj_jh_time" jb_time_field="" jb_field="jb_single_save" /></td>
+                <td><INPUT type="text" id="gc_dsbptj_sj_time" name="gc_dsbptj_sj_time" jb_time_field="" jb_field="jb_single_save" /></td>
+                <td>
+                    <textarea id="gc_dsbptj_time_desc" name="gc_dsbptj_time_desc"  jb_field="jb_single_save" cols="50" rows="1"></textarea>
+                </td>
+            </tr>
+            <tr>
+                <td>大厦报批批准日期</td>
+                <td></td>
+                <td><INPUT type="text" id="gc_dsbppz_time" name="gc_dsbppz_time" jb_time_field="" jb_field="jb_single_save" /></td>
+                <td>
+                    <textarea id="gc_dsbppz_time_desc" name="gc_dsbppz_time_desc"  jb_field="jb_single_save" cols="50" rows="1"></textarea>
+                </td>
+            </tr>
+            <tr>
+                <td>消防报批提交日期</td>
+                <td><INPUT type="text" id="gc_xfbptj_jh_time" name="gc_xfbptj_jh_time" jb_time_field="" jb_field="jb_single_save" /></td>
+                <td><INPUT type="text" id="gc_xfbptj_sj_time" name="gc_xfbptj_sj_time" jb_time_field="" jb_field="jb_single_save" /></td>
+                <td>
+                    <textarea id="gc_xfbptj_time_desc" name="gc_xfbptj_time_desc"  jb_field="jb_single_save" cols="50" rows="1"></textarea>
+                </td>
+            </tr>
+            <tr>
+                <td>消防报批批准日期</td>
+                <td></td>
+                <td><INPUT type="text" id="gc_xfbppz_time" name="gc_xfbppz_time" jb_time_field="" jb_field="jb_single_save" /></td>
+                <td>
+                    <textarea id="gc_xfbppz_time_desc" name="gc_xfbppz_time_desc"  jb_field="jb_single_save" cols="50" rows="1"></textarea>
+                </td>
+            </tr>
+            <tr>
+                <td>装修施工图提交日期</td>
+                <td></td>
+                <td><INPUT type="text" id="sj_zxsgt_time" name="sj_zxsgt_time" jb_time_field=""  jb_field="jb_single_save" /></td>
+                <td>
+                    <textarea id="sj_zxsgt_time_desc" name="sj_zxsgt_time_desc"  jb_field="jb_single_save" cols="50" rows="1"></textarea>
+                </td>
+            </tr>
+            <tr>
+                <td>机电施工图提交日期</td>
+                <td></td>
+                <td><INPUT type="text" id="jd_jdsgttj_time" name="jd_jdsgttj_time"  jb_time_field="" jb_field="jb_single_save" /></td>
+                <td>
+                    <textarea id="jd_jdsgttj_time_desc" name="jd_jdsgttj_time_desc"  jb_field="jb_single_save" cols="50" rows="1"></textarea>
+                </td>
+            </tr>
+            <tr>
+                <td>采购内控单提交时间</td>
+                <td></td>
+                <td><INPUT type="text" id="ys_cg_nkt_tj_time" name="ys_cg_nkt_tj_time"  jb_time_field="" jb_field="jb_single_save" /></td>
+                <td>
+                    <textarea id="ys_cg_nkt_tj_time_desc" name="ys_cg_nkt_tj_time_desc"  jb_field="jb_single_save" cols="50" rows="1"></textarea>
+                </td>
+            </tr>
+            <tr>
+                <td>现场内控单提交时间</td>
+                <td></td>
+                <td><INPUT type="text" id="ys_xc_nkt_tj_time" name="ys_xc_nkt_tj_time"  jb_time_field="" jb_field="jb_single_save" /></td>
+                <td>
+                    <textarea id="ys_xc_nkt_tj_time_desc" name="ys_xc_nkt_tj_time_desc"  jb_field="jb_single_save" cols="50" rows="1"></textarea>
+                </td>
+            </tr>
+            <tr>
+                <td>收楼日期</td>
+                <td></td>
+                <td><INPUT type="text" id="gc_sl_time" name="gc_sl_time" jb_time_field="" jb_field="jb_single_save" /></td>
+                <td>
+                    <textarea id="gc_sl_time_desc" name="gc_sl_time_desc"  jb_field="jb_single_save" cols="50" rows="1"></textarea>
+                </td>
+            </tr>
+            <tr>
+                <td>开工日期</td>
+                <td><INPUT type="text" id="gc_kg_jh_time" name="gc_kg_jh_time" jb_time_field="" jb_field="jb_single_save" /></td>
+                <td><INPUT type="text" id="gc_kg_sj_time" name="gc_kg_sj_time" jb_time_field="" jb_field="jb_single_save" /></td>
+                <td>
+                    <textarea id="gc_kg_time_desc" name="gc_kg_time_desc"  jb_field="jb_single_save" cols="50" rows="1"></textarea>
+                </td>
+            </tr>
+            <tr>
+                <td>隔墙隐检日期</td>
+                <td><INPUT type="text" id="gc_gqyj_jh_time" name="gc_gqyj_jh_time" jb_time_field="" jb_field="jb_single_save" /></td>
+                <td><INPUT type="text" id="gc_gqyj_sj_time" name="gc_gqyj_sj_time" jb_time_field="" jb_field="jb_single_save" /></td>
+                <td>
+                    <textarea id="gc_gqyj_time_desc" name="gc_gqyj_time_desc"  jb_field="jb_single_save" cols="50" rows="1"></textarea>
+                </td>
+            </tr>
+            <tr>
+                <td>材料报批完成时间</td>
+                <td></td>
+                <td><INPUT type="text" id="cg_clbp_wc_time" name="cg_clbp_wc_time" jb_time_field="" jb_field="jb_single_save" /></td>
+                <td>
+                    <textarea id="cg_clbp_wc_time_desc" name="cg_clbp_wc_time_desc"  jb_field="jb_single_save" cols="50" rows="1"></textarea>
+                </td>
+            </tr>
+            <tr>
+                <td>机房移交日期</td>
+                <td><INPUT type="text" id="gc_jfyj_jh_time" name="gc_jfyj_jh_time" jb_time_field="" jb_field="jb_single_save" /></td>
+                <td><INPUT type="text" id="gc_jfyj_sj_time" name="gc_jfyj_sj_time" jb_time_field="" jb_field="jb_single_save" /></td>
+                <td>
+                    <textarea id="gc_jfyj_time_desc" name="gc_jfyj_time_desc"  jb_field="jb_single_save" cols="50" rows="1"></textarea>
+                </td>
+            </tr>
+            <tr>
+                <td>天花隐检日期</td>
+                <td><INPUT type="text" id="gc_thyj_jh_time" name="gc_thyj_jh_time" jb_time_field="" jb_field="jb_single_save" /></td>
+                <td><INPUT type="text" id="gc_thyj_sj_time" name="gc_thyj_sj_time" jb_time_field="" jb_field="jb_single_save" /></td>
+                <td>
+                    <textarea id="gc_thyj_time_desc" name="gc_thyj_time_desc"  jb_field="jb_single_save" cols="50" rows="1"></textarea>
+                </td>
+            </tr>
+            <tr>
+                <td>装修竣工图提交时间</td>
+                <td></td>
+                <td><INPUT type="text" id="sj_zxjgt_time" name="sj_zxjgt_time"  jb_time_field="" jb_field="jb_single_save" /></td>
+                <td>
+                    <textarea id="sj_zxjgt_time_desc" name="sj_zxjgt_time_desc"  jb_field="jb_single_save" cols="50" rows="1"></textarea>
+                </td>
+            </tr>
+            <tr>
+                <td>机电竣工图提交时间</td>
+                <td></td>
+                <td><INPUT type="text" id="jd_jdjgttj_time" name="jd_jdjgttj_time"  jb_time_field="" jb_field="jb_single_save" /></td>
+                <td>
+                    <textarea id="jd_jdjgttj_time_desc" name="jd_jdjgttj_time_desc"  jb_field="jb_single_save" cols="50" rows="1"></textarea>
+                </td>
+            </tr>
+            <tr>
+                <td>消防验收提交日期</td>
+                <td><INPUT type="text" id="gc_xfystj_jh_time" name="gc_xfystj_jh_time" jb_time_field="" jb_field="jb_single_save" /></td>
+                <td><INPUT type="text" id="gc_xfystj_sj_time" name="gc_xfystj_sj_time" jb_time_field="" jb_field="jb_single_save" /></td>
+                <td>
+                    <textarea id="gc_xfystj_time_desc" name="gc_xfbppz_time_desc"  jb_field="jb_single_save" cols="50" rows="1"></textarea>
+                </td>
+            </tr>
+            <tr>
+                <td>消防验收批准日期</td>
+                <td></td>
+                <td><INPUT type="text" id="gc_xfyspz_time" name="gc_xfyspz_time" jb_time_field="" jb_field="jb_single_save" /></td>
+                <td>
+                    <textarea id="gc_xfyspz_time_desc" name="gc_xfyspz_time_desc"  jb_field="jb_single_save" cols="50" rows="1"></textarea>
+                </td>
+            </tr>
+            <tr>
+                <td>项目完工日期(客户验收)</td>
+                <td><INPUT type="text" id="gc_xmwg_khys_jh_time" name="gc_xmwg_khys_jh_time" jb_time_field="" jb_field="jb_single_save" /></td>
+                <td><INPUT type="text" id="gc_xmwg_khys_sj_time" name="gc_xmwg_khys_sj_time" jb_time_field="" jb_field="jb_single_save" /></td>
+                <td>
+                    <textarea id="gc_xmwg_khys_time_desc" name="gc_xmwg_khys_time_desc"  jb_field="jb_single_save" cols="50" rows="1"></textarea>
+                </td>
+            </tr>
+            <tr>
+                <td>项目移交日期(用于质保期计算)</td>
+                <td></td>
+                <td><INPUT type="text" id="gc_xmyj_yyzbqjs_time" name="gc_xmyj_yyzbqjs_time" jb_time_field="" jb_field="jb_single_save" /></td>
+                <td>
+                    <textarea id="gc_xmyj_yyzbqjs_time_desc" name="gc_xmyj_yyzbqjs_time_desc"  jb_field="jb_single_save" cols="50" rows="1"></textarea>
+                </td>
+            </tr>
+            <tr>
+                <td>竣工资料提交日期</td>
+                <td></td>
+                <td><INPUT type="text" id="gc_jgzltj_time" name="gc_jgzltj_time" jb_time_field="" jb_field="jb_single_save" /></td>
+                <td>
+                    <textarea id="gc_jgzltj_time_desc" name="gc_jgzltj_time_desc"  jb_field="jb_single_save" cols="50" rows="1"></textarea>
+                </td>
+            </tr>
+            <tr>
+                <td>客户搬家日期</td>
+                <td><INPUT type="text" id="gc_khbj_jh_time" name="gc_khbj_jh_time" jb_time_field="" jb_field="jb_single_save" /></td>
+                <td><INPUT type="text" id="gc_khbj_sj_time" name="gc_khbj_sj_time" jb_time_field="" jb_field="jb_single_save" /></td>
+                <td>
+                    <textarea id="gc_khbj_time_desc" name="gc_khbj_time_desc"  jb_field="jb_single_save" cols="50" rows="1"></textarea>
+                </td>
+            </tr>
+            <tr>
+                <td>项目结算完成时间</td>
+                <td></td>
+                <td><INPUT type="text" id="ys_jswc_time" name="ys_jswc_time"  jb_time_field="" jb_field="jb_single_save" /></td>
+                <td>
+                    <textarea id="ys_jswc_time_desc" name="ys_jswc_time_desc"  jb_field="jb_single_save" cols="50" rows="1"></textarea>
+                </td>
+            </tr>
+            <tr>
+                <td>移交售后日期</td>
+                <td><INPUT type="text" id="gc_yjsh_jh_time" name="gc_yjsh_jh_time" jb_time_field="" jb_field="jb_single_save" /></td>
+                <td><INPUT type="text" id="gc_yjsh_sj_time" name="gc_yjsh_sj_time" jb_time_field="" jb_field="jb_single_save" /></td>
+                <td>
+                    <textarea id="gc_yjsh_time_desc" name="gc_yjsh_time_desc"  jb_field="jb_single_save" cols="50" rows="1"></textarea>
+                </td>
+            </tr>
+            <tr>
+                <td>质保期满时间</td>
+                <td></td>
+                <td><INPUT type="text" id="gc_zbqm_time" name="gc_zbqm_time" jb_time_field="" jb_field="jb_single_save" /></td>
+                <td>
+                    <textarea id="gc_zbqm_time_desc" name="gc_zbqm_time_desc"  jb_field="jb_single_save" cols="50" rows="1"></textarea>
+                </td>
+            </tr>
+        </table>
+        <br>
+        <div>
+            <div id="sjglchartContainer">FusionCharts XT will load here!</div>
+        </div>
+    </div>
+</div>

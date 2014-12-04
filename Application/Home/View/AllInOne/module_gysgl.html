@@ -1,0 +1,503 @@
+<script type="text/javascript">
+    $(document).ready(function() {
+        function calcMydRate (event){
+            var cur_id = event.target.id;
+            var $cur_sel = $("#" + cur_id);
+            var cur_id_arr = cur_id.split("_");
+            var cur_row_num = cur_id_arr[0];
+            //alert(cur_row_num);
+            var all = 0;
+            var over_b = 0;
+            $("#" + cur_row_num + " td select").each(function(index,elem){
+                var cur = $(elem).val();
+                if($(elem).attr("id").indexOf("ys_fb_ht_lx") != -1){
+                    return;
+                }
+                //alert(cur);
+                if(cur == "A" || cur == "B"){
+                    over_b++;
+                }
+                all++;
+            });
+            //var rate = (over_b/all)*100 + "%";
+            //Math.round(x*10000)/100
+            var rate = (over_b/4)*100 + "%";
+            $("#" + cur_row_num + "_pj_pj").val(rate);
+        }
+        //
+        function getColModel_Id(){
+            return {name:'id',index:'id',
+                    width:20,align:"right",
+                    sortable:true,
+                    editable:false,
+                    readonly:true,
+                    editoptions:{readonly:true,size:20},
+                formoptions:{rowpos:1, label: "id", elmprefix:"(*)"}
+            };
+        }
+        function getColModel_ReadOnly(indexname,rowpos,label,require){
+            return {
+                name:indexname,
+                index:indexname,
+                width:30,
+                align:"right",
+                sortable:true,
+                editable:false,
+                readonly:true,
+                formoptions:{rowpos:rowpos, label: label, elmprefix:"(*)"}
+            };
+        }
+        function getColModel_Ht_lx(indexname,rowpos,label,require){
+            return {
+                name:indexname,
+                index:indexname,
+                width:30,
+                align:"center",
+                sortable:true,
+                stype:'select',//查询类型
+                editable:true,edittype:"select",
+                editoptions:{
+                    value:{
+                        '0':"请选择",
+                        'A':"投标",
+                        'B':"询价",
+                        'C':"直接指定",
+                        'D':"客户指定",
+                        'E':"长期协议"
+                    },
+                    defaultValue:"0"
+                },
+                editrules:{required: (typeof(require )== "undefined") ? false : require },
+                formoptions:{ rowpos:rowpos,label:label,elmprefix:"(*)"}
+            };
+        }
+        function getColModel_Pj(indexname,rowpos,label,require){
+            return {
+                name: indexname,
+                index: indexname,
+                width:20,
+                align:"center",
+                sortable:true,
+                stype:'select',//查询类型
+                editable:true,edittype:"select",
+                editoptions:{
+                    value:{
+                        '0':"请选择",
+                        "A":'非常满意',
+                        "B":'满意',
+                        "C":'基本满意',
+                        "D":'不太满意',
+                        "E":'不满意'
+                    },
+                    defaultValue:"0",
+                    dataEvents: [
+                        {
+                            type: 'change', //change 下拉选择的时候
+                            fn: calcMydRate
+                        }
+                    ]
+                },
+                editrules:{required: (typeof(require )== "undefined") ? false : require },
+                formoptions:{ rowpos:rowpos,label: label ,elmprefix:"(*)"}
+            };
+        }
+        function getColModel_Fbslist(indexname,rowpos,label,require){
+            var fbs_json_str = $("#all_fbs_name").val();
+            var fbs_json_obj = $.parseJSON(fbs_json_str);
+            var fbs_obj = { '0':"请选择"};
+            $.each(fbs_json_obj,function(index,elem){
+                //console.log(index,elem);
+                $.each(elem,function(index2,elem2){
+                    //console.log(index2,elem2);
+                    fbs_obj[elem2["id"]] = elem2["fbs_name"]
+                });
+            });
+            //console.log(fbs_obj);
+            return {
+                name: indexname,
+                index: indexname,
+                width:70,
+                align:"center",
+                sortable:true,
+                stype:'select',//查询类型
+                editable:true,edittype:"select",
+                editoptions:{
+                    value:fbs_obj,
+                    defaultValue:"0"
+                },
+                editrules:{required: (typeof(require )== "undefined") ? false : require },
+                formoptions:{ rowpos:rowpos,label: label ,elmprefix:"(*)"}
+            };
+        }
+        function getColModel_Gyslist(indexname,rowpos,label,require){
+            var gys_json_str = $("#all_gys_name").val();
+            var gys_json_obj = $.parseJSON(gys_json_str);
+            var gys_obj = { '0':"请选择"};
+            $.each(gys_json_obj,function(index,elem){
+                //console.log(index,elem);
+                $.each(elem,function(index2,elem2){
+                    //console.log(index2,elem2);
+                    gys_obj[elem2["id"]] = elem2["gys_name"]
+                });
+            });
+            //console.log(gys_obj);
+            return {
+                name: indexname,
+                index: indexname,
+                width:70,
+                align:"center",
+                sortable:true,
+                stype:'select',//查询类型
+                editable:true,edittype:"select",
+                editoptions:{
+                    value:gys_obj,
+                    defaultValue:"0"
+                },
+                editrules:{required: (typeof(require )== "undefined") ? false : require },
+                formoptions:{ rowpos:rowpos,label: label ,elmprefix:"(*)"}
+            };
+        }
+        //供应商管理 材料管理
+        function setGysClglCommJqGrid(domTableId,domPageId,cur_pro_id,cur_user_id,srctype){
+            var search_url = '/index.php/Home/DbOpt/ajaxGysclglSearch';
+            var save_url = '/index.php/Home/DbOpt/ajaxGysclglSave';
+            var colNames = [];
+            var selfdep = {};
+            var caption_str = "";
+            var selfname = "";
+            var selflable = "";
+            if(srctype == "zxcg"){
+                caption_str = "装修材料";
+                colNames = ['ID','装修材料名称','供应商名称','合同类型','合同金额','VO金额','VO占比','设计部评价','工程部评价','采购部评价','售后部评价','平均评价'];
+                selfname = "sj_pj";
+                selflable = "设计部评价";
+            }else if(srctype == "jdcg"){
+                caption_str = "机电材料";
+                colNames = ['ID','机电材料名称','供应商名称','合同类型','合同金额','VO金额','VO占比','机电部评价','工程部评价','采购部评价','售后部评价','平均评价'];
+                selfname = "jd_pj";
+                selflable = "机电部评价";
+            }
+            var $gyscommgridobj = jQuery(domTableId).jqGrid({
+                url: search_url,
+                datatype: "json",
+                mtype: 'POST',
+                postData: {pro_id:cur_pro_id,srctype:srctype},
+                colNames: colNames,
+                colModel:[
+                    getColModel_Id()
+                    ,
+                    getColModel_ReadOnly("cg_name",2,"材料名称")
+                    ,
+                    getColModel_Gyslist("cg_gys_name",3,"供应商名称")
+                    ,
+                    getColModel_Ht_lx("cg_ht_lx",4,"合同类型")
+                    ,
+                    getColModel_ReadOnly("htje",5,"合同金额")
+                    ,
+                    getColModel_ReadOnly("voje",6,"VO金额")
+                    ,
+                    getColModel_ReadOnly("vozb",7,"VO占比",false)
+                    ,
+                    getColModel_Pj(selfname,8,selflable)
+                    ,
+                    getColModel_Pj("gc_pj",9,"工程部评价")
+                    ,
+                    getColModel_Pj("cg_pj",10,"采购部评价")
+                    ,
+                    getColModel_Pj("sh_pj",11,"售后部评价")
+                    ,
+                    {name:'pj_pj',index:'pj_pj',
+                        width:20,align:"right",
+                        sortable:true,
+                        editable:true, edittype:"text",editrules:{required:false},
+                        editoptions:{size:"20"},
+                        formoptions:{rowpos:12, label: "平均评价", elmprefix:"(*)"}
+                    }
+                ],
+                hiddengrid: false,
+                autowidth: true,
+                rownumbers: true,
+                rowNum:20,
+                rowList:[20,30,50],
+                pager: domPageId,
+                viewrecords: true,
+                sortorder: "desc",
+                forceFit : true,
+                editurl: save_url,
+                caption:caption_str,
+                onSelectRow: function(id){
+                    var rowid = jQuery(domTableId).jqGrid('getGridParam','selrow');
+                    var dep_sx = $("#user_department").val();
+                    if(rowid){
+                        var rowData = $(domTableId).jqGrid('getRowData',rowid);
+                        var domTableId_tag = domTableId.substring(1);
+                        if("cg" == dep_sx || "sj" == dep_sx || "gc" == dep_sx || "cg" == dep_sx || "sh" == dep_sx || "jd" == dep_sx){
+                            $("#" + domTableId_tag + "_iledit").removeClass('ui-state-disabled');
+                        }else{
+                            $("#" + domTableId_tag + "_iledit").addClass('ui-state-disabled');
+                        }
+                    }
+                },
+                onCellSelect: function(rowid,iCol,cellcontent,e){
+                    //alert("cellselect" + cellcontent);
+                },
+                afterInsertRow:function(rowid,rowdata,rowelem){
+                    //alert(rowid);
+                }
+            });
+
+            //导航栏配置和CRUD函数
+            jQuery(domTableId).jqGrid('navGrid',domPageId,
+                    {view:true,search:false,edit:false,add:false,del:false}
+            );
+            //
+            var addparameters = {
+            }
+            //
+            var editparameters = {
+                "keys" : false,
+                oneditfunc: function(rowid){
+                    //alert(rowid);
+                    var dep_sx = $("#user_department").val();
+                    //alert(dep_sx);
+                    $("#" + rowid + " > td > select").each(function(index,elem){
+                        //alert(elem);
+                        //console.log(elem);
+                        var $cur_sel = $(elem);
+                        var cur_name = $cur_sel.attr("name");
+                        //alert(cur_name);
+                        if(cur_name.indexOf(dep_sx) != -1){
+                            //cur dep ok. can edit.
+                        }else{
+                            $cur_sel.attr("disabled",true);
+                            $cur_sel.attr("readonly",true);
+                        }
+                    });
+                },
+                "successfunc" : function(xhr){
+                    var result = eval('(' + xhr.responseText + ')');
+                    if(true == result.state){
+                        return true;
+                    }else{
+                        jAlert(result.msg);
+                        return true;
+                    }
+                },
+                "url" : null,
+                "extraparam" : {pro_id:cur_pro_id,user_id:cur_user_id,srctype:srctype},
+                "aftersavefunc" : null,
+                "errorfunc": null,
+                "afterrestorefunc" : null,
+                "restoreAfterError" : true,
+                "mtype" : "POST"
+            }
+            var parameters = {
+                edit: true,
+                editicon: "ui-icon-pencil",
+                add:false,
+                addicon:"ui-icon-plus",
+                save: true,
+                saveicon:"ui-icon-disk",
+                cancel: true,
+                cancelicon:"ui-icon-cancel",
+                addParams : addparameters,
+                editParams : editparameters
+            }
+            jQuery(domTableId).jqGrid('inlineNav',domPageId,parameters);
+
+            //其他配置
+            jQuery(domTableId).jqGrid('gridResize',{minWidth:1500,maxWidth:2000,minHeight:500, maxHeight:1000});
+            jQuery(domTableId).jqGrid('sortableRows');
+
+/*          jQuery(domTableId).jqGrid('filterToolbar');
+            if($(domPageId + ":contains(Toggle)").length < 1){
+                jQuery(domTableId).jqGrid('navButtonAdd',domPageId,{caption:"Toggle",title:"Toggle Search Toolbar", buttonicon :'ui-icon-pin-s',
+                    onClickButton:function(){
+                        $gyscommgridobj[0].toggleToolbar();
+                    }
+                });
+            }*/
+        }
+        setGysClglCommJqGrid("#gysglzxcl","#pgysglzxcl",$("#pro_id").val(),$("#user_id").val(),"zxcg");
+        setGysClglCommJqGrid("#gysgljdcl","#pgysgljdcl",$("#pro_id").val(),$("#user_id").val(),"jdcg");
+        //-----------------------------------------------------------------------------------------------------
+        function setGysFbglJqGrid(domTableId,domPageId,cur_pro_id,cur_user_id){
+            var caption_str = "分包";
+            var search_url = '/index.php/Home/DbOpt/ajaxGysfbglSearch';
+            var save_url = '/index.php/Home/DbOpt/ajaxGysfbglSave';
+            var colNames = ['ID','分包类型','分包商名称','合同类型','合同金额','VO金额','VO占比','预算部评价','设计部评价','机电部评价','工程部评价','售后部评价','平均评价'];
+
+            var $gyscommgridobj = jQuery(domTableId).jqGrid({
+                url: search_url,
+                datatype: "json",
+                mtype: 'POST',
+                postData: {pro_id:cur_pro_id},
+                colNames: colNames,
+                colModel:[
+                    getColModel_Id()
+                    ,
+                    getColModel_ReadOnly("fb_lx",2,"分包类型")
+                    ,
+                    getColModel_Fbslist("ys_fbs_name",3,"分包商名称")
+                    ,
+                    getColModel_Ht_lx("ys_fb_ht_lx",4,"合同类型")
+                    ,
+                    getColModel_ReadOnly("htje",5,"合同金额")
+                    ,
+                    getColModel_ReadOnly("voje",6,"VO金额")
+                    ,
+                    getColModel_ReadOnly("vozb",7,"VO占比",false)
+                    ,
+                    getColModel_Pj("ys_pj",8,"预算部评价")
+                    ,
+                    getColModel_Pj("sj_pj",9,"设计部评价")
+                    ,
+                    getColModel_Pj("jd_pj",10,"机电部评价")
+                    ,
+                    getColModel_Pj("gc_pj",11,"工程部评价")
+                    ,
+                    getColModel_Pj("sh_pj",12,"售后部评价")
+                    ,
+                    {name:'pj_pj',index:'pj_pj',
+                        width:20,align:"right",
+                        sortable:true,
+                        editable:true, edittype:"text",editrules:{required:false},
+                        editoptions:{size:"20"},
+                        formoptions:{rowpos:13, label: "平均评价", elmprefix:"(*)"}
+                    }
+                ],
+                hiddengrid: false,
+                autowidth: true,
+                rownumbers: true,
+                rowNum:10,
+                rowList:[20,30,50],
+                pager: domPageId,
+                viewrecords: true,
+                sortorder: "asc",
+                forceFit : true,
+                editurl: save_url,
+                caption:caption_str,
+                onSelectRow: function(id){
+                    var rowid = jQuery(domTableId).jqGrid('getGridParam','selrow');
+                    var dep_sx = $("#user_department").val();
+                    if(rowid){
+                        var rowData = $(domTableId).jqGrid('getRowData',rowid);
+                        var domTableId_tag = domTableId.substring(1);
+                        if("ys" == dep_sx || "sj" == dep_sx || "gc" == dep_sx || "sh" == dep_sx || "jd" == dep_sx){
+                            $("#" + domTableId_tag + "_iledit").removeClass('ui-state-disabled');
+                        }else{
+                            $("#" + domTableId_tag + "_iledit").addClass('ui-state-disabled');
+                        }
+                    }
+                },
+                onCellSelect: function(){
+                    //alert("cellselect");
+                },
+                afterInsertRow:function(rowid,rowdata,rowelem){
+                    //alert(rowid);
+                }
+            });
+
+            //导航栏配置和CRUD函数
+            jQuery(domTableId).jqGrid('navGrid',domPageId,
+                    {view:true,search:false,edit:false,add:false,del:false,alerttext:"请选择需要操作的数据行!"}
+            );
+            //
+            var addparameters = {
+            }
+            //
+            var editparameters = {
+                "keys" : false,
+                "oneditfunc" : function(rowid){
+                    //alert(rowid);
+                    var $zxobj = $("#" + rowid + ' > td:contains("装修")');
+                    var dep_sx = $("#user_department").val();
+                    //alert(dep_sx);
+                    $("#" + rowid + " > td > select").each(function(index,elem){
+                        //alert(elem);
+                        //console.log(elem);
+                        var $cur_sel = $(elem);
+                        var cur_name = $cur_sel.attr("name");
+                        //alert(cur_name);
+                        if(cur_name.indexOf(dep_sx) != -1){
+                            //cur dep ok. can edit.
+                            if("sj" == dep_sx && 0 == $zxobj.length ){
+                                $cur_sel.attr("disabled",true);
+                                $cur_sel.attr("readonly",true);
+                            }
+                            if("jd" == dep_sx && 1 == $zxobj.length ){
+                                $cur_sel.attr("disabled",true);
+                                $cur_sel.attr("readonly",true);
+                            }
+                        }else{
+                            $cur_sel.attr("disabled",true);
+                            $cur_sel.attr("readonly",true);
+                        }
+                    });
+                },
+                "successfunc" : function(xhr){
+                    var result = eval('(' + xhr.responseText + ')');
+                    if(true == result.state){
+                        return true;
+                    }else{
+                        jAlert(result.msg);
+                        return true;
+                    }
+                },
+                "url" : null,
+                "extraparam" : {pro_id:cur_pro_id,user_id:cur_user_id},
+                "aftersavefunc" : null,
+                "errorfunc": null,
+                "afterrestorefunc" : null,
+                "restoreAfterError" : true,
+                "mtype" : "POST"
+            }
+            var parameters = {
+                edit: true,
+                editicon: "ui-icon-pencil",
+                add: false,
+                addicon:"ui-icon-plus",
+                save: true,
+                saveicon:"ui-icon-disk",
+                cancel: true,
+                cancelicon:"ui-icon-cancel",
+                addParams : addparameters,
+                editParams : editparameters
+            }
+            jQuery(domTableId).jqGrid('inlineNav',domPageId,parameters);
+
+            //其他配置
+            jQuery(domTableId).jqGrid('gridResize',{minWidth:1500,maxWidth:2000,minHeight:500, maxHeight:1000});
+            jQuery(domTableId).jqGrid('sortableRows');
+
+/*            jQuery(domTableId).jqGrid('filterToolbar');
+             if($(domPageId + ":contains(Toggle)").length < 1){
+             jQuery(domTableId).jqGrid('navButtonAdd',domPageId,{caption:"Toggle",title:"Toggle Search Toolbar", buttonicon :'ui-icon-pin-s',
+             onClickButton:function(){
+             $gyscommgridobj[0].toggleToolbar();
+             }
+             });
+             }*/
+        }
+        setGysFbglJqGrid("#gysglfb","#pgysglfb",$("#pro_id").val(),$("#user_id").val());
+    });
+</script>
+<div id="module_gysgl"  class="module">
+    <h3><a href="#">供应商管理</a></h3>
+    <div>
+        <div>
+            <table id="gysglfb"></table>
+            <div id="pgysglfb"></div>
+        </div>
+        <br>
+        <div>
+            <table id="gysglzxcl"></table>
+            <div id="pgysglzxcl"></div>
+        </div>
+        <br>
+        <div>
+            <table id="gysgljdcl"></table>
+            <div id="pgysgljdcl"></div>
+        </div>
+    </div>
+</div>

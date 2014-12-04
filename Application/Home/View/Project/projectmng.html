@@ -1,0 +1,23 @@
+<script src="__PUBLIC__/js/projectmng.js"></script>
+
+
+<table id="projectmnglist"></table>
+<div id="pprojectmnglist"></div>
+<div id="privilegeResult" name="privilegeResult" >
+    <div id="privilegeDiv" >
+        <FORM id="privilegeAddForm" method="post" action="__URL__/ajaxPrivilegeSave">
+            <br />
+            当前项目ID:
+            <input id="pro2user_pro_id"  type="text" name="pro2user_pro_id"  value="" readOnly="true" /><br />
+            <input id="pro2user_all_str" type="text" name="pro2user_all_str" value=""  style="display:none;"/>
+            <div>
+                <ul id="privilegeCheckedShow" ></ul>
+            </div>
+        <ul id="privilegeTree" class="ztree">
+        </ul>
+        <INPUT type="submit" value="提交"><INPUT type="reset" value="关闭" onclick='$("#privilegeDiv").hide();'>
+        </FORM>
+    </div>
+</div>
+
+

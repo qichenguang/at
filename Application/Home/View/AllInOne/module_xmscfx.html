@@ -1,0 +1,138 @@
+<script type="text/javascript">
+    $(document).ready(function() {
+        $("#sc_pro_trade_base").on('change',function(){
+            var v = $(this).val();
+            if("L" == v){
+                $("#sc_pro_trade_ot_name").attr("disabled",false);
+            }else{
+                $("#sc_pro_trade_ot_name").attr("disabled",true);
+            }
+        });
+        if($("#sc_pro_trade_base").val() != "L"){
+            $("#sc_pro_trade_ot_name").attr("disabled",true);
+        }else{
+            $("#sc_pro_trade_ot_name").attr("disabled",false);
+        }
+
+/*
+        //
+        $("#sc_compety_company_base").on('change',function(){
+            $('#sc_compety_company').tagit('removeAll');
+            var cur_sel_arr= $(this).val();
+            $.each(cur_sel_arr,function(index,elem){
+                $('#sc_compety_company').tagit('createTag',elem);
+            });
+        });
+        //
+        $('#sc_compety_company').tagit();
+        $('#aaa').on('click',function(){
+            alert($("#sc_compety_company").val());
+        });
+        //
+*/
+    });
+</script>
+<div id="module_xmscfx"  class="module">
+    <h3><a href="#">项目市场分析</a></h3>
+    <div>
+<!--    项目行业	来自市场部	客户类型	来自市场部
+        竞争对手	来自市场部	中标策略分析会	来自市场部
+        落标原因	来自市场部	中标原因	来自市场部-->
+        <table jb_table="bordered">
+            <tr>
+                <td>
+                    项目行业:</td><td>
+                    <div>
+                    选择:
+                    <select id="sc_pro_trade_base" name="sc_pro_trade_base" jb_field="jb_single_save">
+                        <option value="0"  selected="selected">请选择</option>
+                        <option value="A">IT</option>
+                        <option value="B">金融</option>
+                        <option value="C">医药</option>
+                        <option value="D">食品</option>
+                        <option value="E">工业</option>
+                        <option value="F">物流</option>
+                        <option value="G">汽车</option>
+                        <option value="H">能源</option>
+                        <option value="I">零售</option>
+                        <option value="J">日用品</option>
+                        <option value="K">咨询</option>
+                        <option value="L">其它</option>
+                    </select>
+                    <br>
+                    其它行业名称：<INPUT type="text" id="sc_pro_trade_ot_name" name="sc_pro_trade_ot_name"  jb_field="jb_single_save" />
+                    </div>
+                </td>
+                <td>客户类别1:</td><td>
+                    <select id="sc_cus_t_1" name="sc_cus_t_1" jb_field="jb_single_save" >
+                        <option value="0" selected="selected">请选择</option>
+                        <option value="A">单价：每平米小于2000</option>
+                        <option value="B">单价：每平米2000-4000</option>
+                        <option value="C">单价：每平米大于4000</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    竞争对手:</td><td>
+                    <div>
+                    选择:
+                    <select id="sc_compety_company_base" name="sc_compety_company_base" multiple="multiple" jb_field="multiple" >
+                        <option value="A">EDG</option>
+                        <option value="B">MOSSER</option>
+                        <option value="C">大兴施</option>
+                        <option value="D">KRA</option>
+                        <option value="E">C&C</option>
+                        <option value="F">格林贝斯</option>
+                    </select>
+                    <br>
+                    其它:<INPUT type="text" id="sc_compety_company_ot" name="sc_compety_company_ot" jb_field=""/>
+                    <a id="sc_compety_company" jb_field="jb_select_save" >...存盘...</a>
+                    </div>
+                </td>
+                <td>中标策略分析会:</td><td>
+                    <select id="sc_tbcl_fxh" name="sc_tbcl_fxh"  jb_field="jb_select_save" >
+                        <option value="0" selected="selected">请选择</option>
+                        <option value="Y">Y</option>
+                        <option value="N">N</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>落标原因:</td><td>
+                    <div>
+                    选择:
+                    <select id="sc_lb_reason_base" name="sc_lb_reason_base" multiple="multiple" jb_field="multiple" >
+                        <option value="A">以前工程做的不好</option>
+                        <option value="B">装饰设计原因</option>
+                        <option value="C">机电方案原因</option>
+                        <option value="D">客户关系原因</option>
+                        <option value="E">报价原因</option>
+                        <option value="F">讲标原因</option>
+                        <option value="G">客户取消项目</option>
+                    </select>
+                    <br>
+                    其它:<textarea id="sc_lb_reason_ot" name="sc_lb_reason_ot"  jb_field="" ></textarea>
+                    <a id="sc_lb_reason" jb_field="jb_select_save" >...存盘...</a>
+                    </div>
+                </td>
+                <td>中标原因:</td><td>
+                    <div>
+                    选择:
+                    <select id="sc_zb_reason_base" name="sc_zb_reason_base" multiple="multiple" jb_field="multiple" >
+                        <option value="A">以前工程客户满意度高</option>
+                        <option value="B">装饰设计原因</option>
+                        <option value="C">机电方案原因</option>
+                        <option value="D">客户关系原因</option>
+                        <option value="E">报价原因</option>
+                        <option value="F">讲标原因</option>
+                    </select>
+                    <br>
+                    其它:<textarea id="sc_zb_reason_ot" name="sc_zb_reason_ot"  jb_field="" ></textarea>
+                    <a id="sc_zb_reason" jb_field="jb_select_save" >...存盘...</a>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>

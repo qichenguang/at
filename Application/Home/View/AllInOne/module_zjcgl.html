@@ -1,0 +1,221 @@
+<script type="text/javascript">
+    $(document).ready(function() {
+        if($("#lock").length >= 1){
+            $("#lock").button().click(function(event){
+                //jquery promise init.
+                $.when(pro_account_lock(2))
+                        .done(function(){
+                            //
+                            $("#zj_lock").val(2);
+                            //$("#lock").hide();
+                        });
+            });
+            if($("#zj_lock").val() == 2){
+                //$("#lock").hide();
+            }else{
+                $("#lock").show();
+            }
+        }
+        if($("#unlock").length >= 1){
+            $("#unlock").button().click(function(event){
+                $.when(pro_account_lock(1))
+                        .done(function(){
+                            //
+                            $("#zj_lock").val(1);
+                        });
+            });
+            //$("#unlock").hide();
+        }
+        function pro_account_lock(lock_flag){
+            var ret = $.get("/index.php/Home/DbOpt/ajaxSetProAcco?pro_id=" + $("#pro_id").val() + '&zj_lock=' + lock_flag, function(xhr){
+                console.log(xhr);
+                });
+            return ret;
+        }
+        //
+        function calcInputJe(event){
+            var cur_id = event.target.id;
+            var cur_id_arr = cur_id.split("_");
+            var cur_row_num = cur_id_arr[0];
+            var lrje = $("#" + cur_id).val();
+            //alert(lrje);
+            var kyje = $("#" + cur_row_num + "  td:eq(5)").text();
+            console.log(kyje);
+            if(parseFloat(lrje) > parseFloat(kyje)){
+                alert("录入金额超过最大使用金额!");
+                $("#zjcgl_ilsave").addClass("ui-state-disabled");
+                return false;
+            }
+        }
+        function getColModel_Id(){
+            return {name:'id',index:'id',
+                width:20,align:"right",
+                sortable:true,
+                editable:false,
+                readonly:true,
+                editoptions:{readonly:true,size:20},
+                formoptions:{rowpos:1, label: "id", elmprefix:"(*)"}
+            };
+        }
+        function getColModel_ReadOnly(indexname,rowpos,label,require,canSort){
+            return {
+                name:indexname,
+                index:indexname,
+                width:30,
+                align:"right",
+                sortable:(typeof(canSort )== "undefined") ? true : canSort,
+                editable:false,
+                readonly:true,
+                formoptions:{rowpos:rowpos, label: label, elmprefix:"(*)"}
+            };
+        }
+        //zjcgl
+        function setZjcglJqGrid(domTableId,domPageId,cur_pro_id,cur_user_id,cur_dep_id,cur_zj_lock){
+            var    caption_str = "项目资金账号管理";
+            var    search_url = '/index.php/Home/AllInOne/ajaxZjcSearch';
+            var    save_url = '/index.php/Home/AllInOne/ajaxZjcSave'
+            var    colNames = ['ID','账号名称','账号ID','初始金额','可用金额','使用金额'];
+            //
+            var $zjcgridobj = jQuery(domTableId).jqGrid({
+                url: search_url,
+                datatype: "json",
+                mtype: 'POST',
+                postData: {pro_id:cur_pro_id,zj_lock:cur_zj_lock},
+                colNames: colNames,
+                colModel:[
+                    getColModel_Id(),
+                    getColModel_ReadOnly("account_name",2,"账号名称",false,false),
+                    getColModel_ReadOnly("account_id",3,"账号ID"),
+                    getColModel_ReadOnly("account_csje",4,"初始金额",false,false),
+                    getColModel_ReadOnly("account_kyje",5,"可用金额",false,false),
+                    {
+                        name:"pro_account_csje",
+                        index:"pro_account_csje",
+                        width:20,
+                        align:"right",
+                        sortable:false,
+                        editable:true, edittype:"text",
+                        editrules:true ,
+                        editoptions:{
+                            size:"20",
+                            defaultValue:"0",
+                            dataEvents: [
+                                {
+                                    type: 'change', //change 下拉选择的时候
+                                    fn: calcInputJe
+                                }
+                            ]
+                        },
+                        formoptions:{rowpos:6, label: "使用金额", elmprefix:"(*)"}
+                    }
+                ],
+                hiddengrid: false,
+                autowidth: true,
+                rownumbers: true,
+                rowNum:20,
+                rowList:[20,30,50],
+                pager: domPageId,
+                viewrecords: true,
+                sortorder: "asc",
+                forceFit : true,
+                editurl: save_url,
+                caption:caption_str,
+                footerrow : true,
+                //userDataOnFooter : true,
+                //altRows : true,
+                gridComplete: function() {
+                    var rowNum = parseInt(jQuery(domTableId).jqGrid('getGridParam','records',10));
+                    if(rowNum > 0){
+                        var pro_acco_je  = jQuery(domTableId).jqGrid('getCol','pro_account_csje',false,'sum');
+                        jQuery(domTableId).jqGrid('footerData',"set",{account_kyje:'合计:',pro_account_csje:pro_acco_je});
+                    }
+                },
+                onSelectRow: function(id){
+                    //alert("cellselect");
+                },
+                onCellSelect: function(){
+                    //alert("cellselect");
+                },
+                afterInsertRow:function(rowid,rowdata,rowelem){
+                    //alert(rowid);
+                }
+            });
+            //导航栏配置和CRUD函数
+            jQuery(domTableId).jqGrid('navGrid',domPageId,
+                    {view:true,search:false,edit:false,add:false,del:false}
+            );
+            //
+            var addparameters = {
+                rowID : "new_row",
+                initdata : {},
+                position :"first",
+                useDefValues : false,
+                useFormatter : false,
+                addRowParams : {
+                    extraparam:{pro_id:cur_pro_id,user_id:cur_user_id},
+                    successfunc : function(xhr){
+                        var result = eval('(' + xhr.responseText + ')');
+                        if(true == result.state){
+                            jQuery(domTableId).trigger("reloadGrid");
+                            return true;
+                        }else{
+                            jAlert(result.msg);
+                            return true;
+                        }
+                    }
+                }
+            }
+            //
+            var editparameters = {
+                "keys" : false,
+                "oneditfunc" : null,
+                "successfunc" : function(xhr){
+                    var result = eval('(' + xhr.responseText + ')');
+                    if(true == result.state){
+                        jQuery(domTableId).trigger("reloadGrid");
+                        return true;
+                    }else{
+                        jAlert(result.msg);
+                        return true;
+                    }
+                },
+                "url" : null,
+                "extraparam" : {pro_id:cur_pro_id,user_id:cur_user_id},
+                "aftersavefunc" : null,
+                "errorfunc": null,
+                "afterrestorefunc" : null,
+                "restoreAfterError" : true,
+                "mtype" : "POST"
+            }
+            var parameters = {
+                edit: true,
+                editicon: "ui-icon-pencil",
+                add: false,
+                addicon:"ui-icon-plus",
+                save: true,
+                saveicon:"ui-icon-disk",
+                cancel: true,
+                cancelicon:"ui-icon-cancel",
+                addParams : addparameters,
+                editParams : editparameters
+            }
+            if(parseInt(cur_zj_lock) != 2){
+                jQuery(domTableId).jqGrid('inlineNav',domPageId,parameters);
+            }
+            //其他配置
+            jQuery(domTableId).jqGrid('gridResize',{minWidth:1500,maxWidth:2000,minHeight:500, maxHeight:1000});
+            jQuery(domTableId).jqGrid('sortableRows');
+        }
+        setZjcglJqGrid("#zjcgl","#pzjcgl",$("#pro_id").val(),$("#user_id").val(),$("#user_department").val(),$("#zj_lock").val());
+    });
+</script>
+<div id="module_zjcgl"  class="module">
+    <h3><a href="#">资金池管理</a></h3>
+    <div>
+        <span id="lock">资金锁定</span><span id="unlock">资金解锁</span>
+        <div>
+            <table id="zjcgl"></table>
+            <div id="pzjcgl"></div>
+        </div>
+    </div>
+</div>

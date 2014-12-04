@@ -1,0 +1,190 @@
+<script type="text/javascript">
+    $(document).ready(function() {
+        function calcMydNum(propname,propval){
+            var all = 0;
+            var over_b = 0;
+            $("#module_khbyd [" + propname + "=" + propval + "]").each(function(){
+                var cur = $(this).val();
+                if(cur == "A" || cur == "B"){
+                    over_b++;
+                }
+                all++;
+            });
+            var rate = Math.round((over_b/all) * 10000)/100 + "%";
+            if("jb_myd_select" == propname){
+                $("#" + propval + "_" + propval + "_rate_all").text(rate);
+            }else{
+                $("#sh_" + propval + "_rate_all").text(rate);
+            }
+        }
+
+        $("#module_khbyd [jb_myd_select]").on('change',function(e){
+            var attr = $(this).attr("jb_myd_select");
+            calcMydNum("jb_myd_select",attr);
+        });
+        $("#module_khbyd [jb_sh_myd_select]").on('change',function(e){
+            var attr = $(this).attr("jb_sh_myd_select");
+            calcMydNum("jb_sh_myd_select",attr);
+        });
+        calcMydNum("jb_myd_select","qq");
+        calcMydNum("jb_myd_select","sj");
+        calcMydNum("jb_myd_select","sg");
+        calcMydNum("jb_sh_myd_select","sh");
+        calcMydNum("jb_sh_myd_select","sj");
+        calcMydNum("jb_sh_myd_select","sg");
+        calcMydNum("jb_sh_myd_select","zx");
+        //--------------------------------------------------------------------------------------------------------------
+
+    });
+</script>
+<div id="module_khbyd"  class="module">
+    <h3><a href="#">客户满意度管理</a></h3>
+    <div>
+        <table jb_table="bordered">
+            <thead>
+                <tr>
+                    <th>总体</th>
+                    <th>满意度</th>
+                    <th>说明</th>
+                </tr>
+            </thead>
+                <tr>
+                    <td>总体服务满意度</td>
+                    <td>
+                        <select id="sc_zt_myd" name="sc_zt_myd"  jb_field="jb_single_save" >
+                            <option value="" selected="selected">请选择</option>
+                            <option value="A">非常满意</option>
+                            <option value="B">满意</option>
+                            <option value="C">基本满意</option>
+                            <option value="D">不太满意</option>
+                            <option value="E">不满意</option>
+                        </select>
+                    </td>
+                    <td>
+                        <textarea id="sc_zt_myd_desc" name="sc_zt_myd_desc"  jb_field="jb_single_save" ></textarea>
+                    </td>
+                </tr>
+                <tr>
+                    <td>售后总体维修服务满意度</td>
+                    <td>
+                        <select id="sh_zt_myd" name="sh_zt_myd"  jb_field="jb_single_save" >
+                            <option value="" selected="selected">请选择</option>
+                            <option value="A">优</option>
+                            <option value="B">良</option>
+                            <option value="C">一般</option>
+                            <option value="D">差</option>
+                            <option value="E">劣</option>
+                        </select>
+                    </td>
+                    <td>
+                        <textarea id="sh_zt_myd_desc" name="sh_zt_myd_desc"  jb_field="jb_single_save" ></textarea>
+                    </td>
+                </tr>
+                <tr>
+                    <td>总体之工程表现评估为</td>
+                    <td>
+                        <select id="sh_zt_gc_myd" name="sh_zt_gc_myd"  jb_field="jb_single_save" >
+                            <option value="" selected="selected">请选择</option>
+                            <option value="A">优</option>
+                            <option value="B">良</option>
+                            <option value="C">一般</option>
+                            <option value="D">差</option>
+                            <option value="E">劣</option>
+                        </select>
+                    </td>
+                    <td>
+                        <textarea id="sh_zt_gc_myd_desc" name="sh_zt_gc_myd_desc"  jb_field="jb_single_save" ></textarea>
+                    </td>
+                </tr>
+        <volist name="myd_list" id="vo" >
+            <thead>
+                <tr>
+                    <th>{$vo.name}满意度平均值</th>
+                    <th><span id="{$vo.sx}_{$vo.lx}_rate_all"></span></th>
+                    <th></th>
+                </tr>
+               <tr>
+                    <th>{$vo.name}子项</th>
+                    <th>满意度</th>
+                    <th>说明</th>
+                </tr>
+            </thead>
+            <volist name="vo['item']" id="sub">
+                <if condition="$vo.sx eq qq ">
+                    <tr>
+                        <td>{$key}. {$sub}</td>
+                        <td>
+                            <select id="sc_qq_myd_{$key}" name="sc_qq_myd_{$key}"  jb_myd_select="qq" jb_field="jb_single_save" >
+                                <option value="" selected="selected">请选择</option>
+                                <option value="A">非常满意</option>
+                                <option value="B">满意</option>
+                                <option value="C">基本满意</option>
+                                <option value="D">不太满意</option>
+                                <option value="E">不满意</option>
+                            </select>
+                        </td>
+                        <td>
+                            <textarea id="sc_qq_myd_{$key}_desc" name="sc_qq_myd_{$key}_desc"  jb_field="jb_single_save" ></textarea>
+                        </td>
+                    </tr>
+                </if>
+                <if condition="$vo.sx eq sj ">
+                    <tr>
+                        <td>{$key}. {$sub}</td>
+                        <td>
+                            <select id="sc_sj_myd_{$key}" name="sc_sj_myd_{$key}"  jb_myd_select="sj" jb_field="jb_single_save" >
+                                <option value="" selected="selected">请选择</option>
+                                <option value="A">非常满意</option>
+                                <option value="B">满意</option>
+                                <option value="C">基本满意</option>
+                                <option value="D">不太满意</option>
+                                <option value="E">不满意</option>
+                            </select>
+                        </td>
+                        <td>
+                            <textarea id="sc_sj_myd_{$key}_desc" name="sc_sj_myd_{$key}_desc"  jb_field="jb_single_save" ></textarea>
+                        </td>
+                    </tr>
+                </if>
+                <if condition="$vo.sx eq sg ">
+                    <tr>
+                        <td>{$key}. {$sub}</td>
+                        <td>
+                            <select id="sc_sg_myd_{$key}" name="sc_sg_myd_{$key}"  jb_myd_select="sg" jb_field="jb_single_save" >
+                                <option value="" selected="selected">请选择</option>
+                                <option value="A">非常满意</option>
+                                <option value="B">满意</option>
+                                <option value="C">基本满意</option>
+                                <option value="D">不太满意</option>
+                                <option value="E">不满意</option>
+                            </select>
+                        </td>
+                        <td>
+                            <textarea id="sc_sg_myd_{$key}_desc" name="sc_sg_myd_{$key}_desc"  jb_field="jb_single_save" ></textarea>
+                        </td>
+                    </tr>
+                </if>
+                <if condition="$vo.sx eq sh ">
+                    <tr>
+                        <td>{$key}. {$sub}</td>
+                        <td>
+                            <select id="sh_{$vo.lx}_myd_{$key}" name="sh_{$vo.lx}_myd_{$key}"  jb_sh_myd_select="{$vo.lx}" jb_field="jb_single_save" >
+                                <option value="" selected="selected">请选择</option>
+                                <option value="A">优</option>
+                                <option value="B">良</option>
+                                <option value="C">一般</option>
+                                <option value="D">差</option>
+                                <option value="E">劣</option>
+                            </select>
+                        </td>
+                        <td>
+                            <textarea id="sh_{$vo.lx}_myd_{$key}_desc" name="sh_{$vo.lx}_myd_{$key}_desc"  jb_field="jb_single_save"></textarea>
+                        </td>
+                    </tr>
+                </if>
+            </volist>
+
+        </volist>
+        </table>
+    </div>
+</div>

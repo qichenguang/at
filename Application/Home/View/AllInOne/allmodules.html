@@ -1,0 +1,39 @@
+<script src="__PUBLIC__/js/allmodules.js"></script>
+<script src="__PUBLIC__/js/Lib/darktooltip/jquery.darktooltip.min.js"></script>
+<link rel="stylesheet" type="text/css"  href="__PUBLIC__/style/darktooltip/darktooltip.css" />
+<script src="__PUBLIC__/js/Lib/jquery-ui-multiselect-widget/src/jquery.multiselect.js"></script>
+<script src="__PUBLIC__/js/Lib/jquery-ui-multiselect-widget/i18n/jquery.multiselect.zh-cn.js"></script>
+<link rel="stylesheet" type="text/css"  href="__PUBLIC__/js/Lib/jquery-ui-multiselect-widget/jquery.multiselect.css" />
+
+
+<!--<div id="AllInOneMain"  style="display:none">-->
+<div id="AllInOneMain" >
+    <INPUT type="text" id="user_id" name="user_id" value="{$user_id}" >
+    <br/>
+    <INPUT type="text" id="user_department" name="user_department" value="{$user_department}" >
+    <br/>
+    <INPUT type="text" id="dep_module" name="dep_module" value='{$dep_module}' >
+    <br/>
+    <INPUT type="text" id="pro_id" name="pro_id" value="{$pro_id}" >
+    <br/>
+    <textarea rows="10" cols="200" id="project_rec_detail" name="project_rec_detail">{$project_rec_detail}</textarea>
+    <br/>
+    <INPUT type="text" id="dep_sx" name="dep_sx" value="{$dep_sx}" >
+    <br/>
+    <INPUT type="text" id="zj_lock" name="zj_lock" value="{$zj_lock}" >
+    <br/>
+    <INPUT type="text" id="pro_zjze" name="pro_zjze" value="{$pro_zjze}" >
+    <br/>
+    <textarea rows="10" cols="200" id="all_dep_username" name="all_dep_username" >{$all_dep_username}</textarea>
+    <br/>
+</div>
+
+
+<div id="AllInOneDetail">
+    <include file="AllInOne/module_zjcgl" />
+    <include file="AllInOne/module_curInventory" />
+    <include file="AllInOne/module_jobbuy" />
+    <include file="AllInOne/module_jobsell" />
+</div>
+
+

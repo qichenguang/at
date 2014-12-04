@@ -1,0 +1,1418 @@
+<script type="text/javascript">
+    $(document).ready(function() {
+        //-------------------------------------------------------------------------------------------
+        //多字段 合计
+        //--------------------------------------------------------------------------------------------
+        //hj
+        function get_comm_hj(domDiv,hjType,domResult){
+            var sum = 0.00;
+            $("#" + domDiv + " [jb_hj=" + hjType + "]").each(function(){
+                sum += parseFloat($(this).val()) || 0.00;
+            });
+            $("#" + domResult).val(sum);
+        }
+        //add blur
+        function add_comm_hj_event(domDiv,hjType,domResult){
+            $("#" + domDiv + " [jb_hj=" + hjType + "]").each(function(){
+               $(this).on('blur',function(){
+                   if("nkje" == hjType){
+                       var cur_id = $(this).attr("id");
+                       var cur_dwbj_id = cur_id.substring(0,cur_id.lastIndexOf("_")) + "_dwbj";
+                       //alert(cur_dwbj_id);
+                       var nkje = parseFloat($(this).val()) || 0.00;
+                       //alert(nkje);
+                       var dwbj =  parseFloat($("#" + cur_dwbj_id).val()) || 0.00;
+                       //alert(dwbj);
+                       if(nkje > dwbj){
+                           alert("内控金额 大于 对外报价！");
+                           $(this).focus();
+                           return;
+                       }
+                   }
+                   //mll
+                   get_comm_mll("module_xmcbgl","jb_kgmll");
+                   get_comm_mll("module_xmcbgl","jb_sjmll");
+                   //hj
+                   get_comm_hj(domDiv,hjType,domResult);
+                   //total
+                   get_comm_total_mll("module_xmcbgl");
+                   //zj
+                   get_total_zj("module_xmcbgl");
+               });
+            });
+        }
+        //get vo
+        function get_all_vo_hj(srctype){
+            var ret = $.get("/index.php/Home/DbOpt/ajaxGetAllVOJe?pro_id=" + $("#pro_id").val() + "&srctype=" + srctype, function(xhr){
+                //console.log(xhr);
+                $.each(xhr,function(index,element){
+                    //alert(index);
+                    //alert(element);
+                    $("#ys_" + index + "_" + srctype + "_vo").val(element);
+                });
+                //
+                get_comm_hj("module_xmcbgl",srctype + "_vo","ys_hj_" + srctype + "_vo");
+                //
+                //single cg
+                $("#ys_hj_cg_customer_vo").val(parseFloat($("#ys_cg_customer_vo").val()) || 0.00);
+
+            });
+            return ret;
+        }
+        //mll
+        function get_comm_mll(domDiv,mlltype){
+            $("#" + domDiv + " [" + mlltype + "]").each(function(){
+                if("jb_kgmll" == mlltype){
+                    var fb_type = $(this).attr(mlltype);
+                    var fb_dwbj = parseFloat($("#ys_" + fb_type + "_dwbj").val()) || 0.00;
+                    var fb_nkje = parseFloat($("#ys_" + fb_type + "_nkje").val()) || 0.00;
+                    var fb_kgmll = 0.00;
+                    if(fb_dwbj > 0.00 ){
+                        fb_kgmll = (parseFloat(fb_dwbj) - parseFloat(fb_nkje))/parseFloat(fb_dwbj) ;
+                    }
+                    //Math.round(x*100)/100
+                    $("#ys_" + fb_type + "_kgmll").val(Math.round(fb_kgmll * 10000)/100 + "%");
+                }else if("jb_sjmll" == mlltype){
+                    var fb_type = $(this).attr(mlltype);
+                    var fb_dwbj = parseFloat($("#ys_" + fb_type + "_dwbj").val()) || 0.00;
+                    var fb_customer_vo = parseFloat($("#ys_" + fb_type + "_customer_vo").val()) || 0.00;
+                    var fb_sjcb = parseFloat($("#ys_" + fb_type + "_sjcb").val()) || 0.00;
+                    var fb_fb_vo = parseFloat($("#ys_" + fb_type + "_fb_vo").val()) || 0.00;
+                    var fb_sjmll = 0.00;
+                    if(fb_dwbj > 0.00 ){
+                        fb_sjmll = (parseFloat(fb_dwbj) + parseFloat(fb_customer_vo) - parseFloat(fb_sjcb) - parseFloat(fb_fb_vo))/(parseFloat(fb_dwbj) + parseFloat(fb_customer_vo)) ;
+                    }
+                    //Math.round(x*100)/100
+                    $("#ys_" + fb_type + "_sjmll").val(Math.round(fb_sjmll * 10000)/100 + "%");
+                }
+            });
+        }
+        //total_mll
+        function get_comm_total_mll(domDiv){
+            var fb_dwbj = $("#ys_hj_dwbj").val() || 0.00;
+            var fb_nkje = $("#ys_hj_nkje").val() || 0.00;
+            var fb_kgmll = 0.00;
+            if(fb_dwbj > 0.00 ){
+                fb_kgmll = (parseFloat(fb_dwbj) - parseFloat(fb_nkje))/parseFloat(fb_dwbj) ;
+            }
+            //Math.round(x*100)/100
+            $("#ys_hj_kgmll").val(Math.round(fb_kgmll * 10000)/100 + "%");
+            //
+            var fb_customer_vo = $("#ys_hj_customer_vo").val() || 0.00;
+            var fb_sjcb = $("#ys_hj_sjcb").val() || 0.00;
+            var fb_fb_vo = $("#ys_hj_fb_vo").val() || 0.00;
+            var fb_sjmll = 0.00;
+            if(fb_dwbj > 0.00 ){
+                fb_sjmll = (parseFloat(fb_dwbj) + parseFloat(fb_customer_vo) - parseFloat(fb_sjcb) - parseFloat(fb_fb_vo))/(parseFloat(fb_dwbj) + parseFloat(fb_customer_vo)) ;
+                //Math.round(x*100)/100
+                $("#ys_hj_sjmll").val(Math.round(fb_sjmll * 10000)/100 + "%");
+            }
+        }
+        //-------------------------------------------------------------------------------------------
+        //单字段 合计
+        //--------------------------------------------------------------------------------------------
+        //add single blur
+        function add_single_hj_event(domDiv,hjType,domResult){
+            $("#" + domDiv + " [jb_single_hj=" + hjType + "]").each(function(){
+                $(this).on('blur',function(){
+                    if("nkje" == hjType){
+                        var cur_id = $(this).attr("id");
+                        var cur_dwbj_id = cur_id.substring(0,cur_id.lastIndexOf("_")) + "_dwbj";
+                        //alert(cur_dwbj_id);
+                        var nkje = parseFloat($(this).val()) || 0.00;
+                        //alert(nkje);
+                        var dwbj =  parseFloat($("#" + cur_dwbj_id).val()) || 0.00;
+                        //alert(dwbj);
+                        if(nkje > dwbj){
+                            alert("内控金额 大于 对外报价！");
+                            $(this).focus();
+                            return;
+                        }
+                    }
+                    //single
+                    get_single_mll("module_xmcbgl","jb_single_kgmll");
+                    //hj
+                    $("#" + domResult).val(parseFloat($(this).val()) || 0.00);
+                    //total
+                    get_single_total_mll("module_xmcbgl");
+                    //zj
+                    get_total_zj("module_xmcbgl");
+                });
+            });
+        }
+        //single mll
+        function get_single_mll(domDiv,mlltype){
+            $("#" + domDiv + " [" + mlltype + "]").each(function(){
+                if("jb_single_kgmll" == mlltype || "jb_qq_kgmll" == mlltype || "jb_rg_kgmll" == mlltype || "jb_qt_kgmll" == mlltype ){
+                    var fb_type = $(this).attr(mlltype);
+                    var fb_dwbj = parseFloat($("#ys_" + fb_type + "_dwbj").val()) || 0.00;
+                    var fb_nkje = parseFloat($("#ys_" + fb_type + "_nkje").val()) || 0.00;
+                    var fb_kgmll = 0.00;
+                    if(fb_dwbj > 0.00 ){
+                        fb_kgmll = (parseFloat(fb_dwbj) - parseFloat(fb_nkje))/parseFloat(fb_dwbj) ;
+                    }
+                    //Math.round(x*100)/100
+                    $("#ys_" + fb_type + "_kgmll").val(Math.round(fb_kgmll * 10000)/100 + "%");
+                }else if("jb_sjmll" == mlltype || "jb_qq_sjmll" == mlltype || "jb_rg_sjmll" == mlltype || "jb_qt_sjmll" == mlltype){
+                    var fb_type = $(this).attr(mlltype);
+                    var fb_dwbj = parseFloat($("#ys_" + fb_type + "_dwbj").val()) || 0.00;
+                    var fb_customer_vo = parseFloat($("#ys_" + fb_type + "_customer_vo").val()) || 0.00;
+                    var fb_sjcb = parseFloat($("#ys_" + fb_type + "_sjcb").val()) || 0.00;
+                    var fb_fb_vo = parseFloat($("#ys_" + fb_type + "_fb_vo").val()) || 0.00;
+                    if("jb_qq_sjmll" == mlltype || "jb_rg_sjmll" == mlltype || "jb_qt_sjmll" == mlltype){
+                        fb_fb_vo = parseFloat($("#ys_" + fb_type + "_vo").val()) || 0.00;
+                    }
+                    var fb_sjmll = 0.00;
+                    if(fb_dwbj > 0.00 ){
+                        fb_sjmll = (parseFloat(fb_dwbj) + parseFloat(fb_customer_vo) - parseFloat(fb_sjcb) - parseFloat(fb_fb_vo))/(parseFloat(fb_dwbj) + parseFloat(fb_customer_vo)) ;
+                    }
+                    //Math.round(x*100)/100
+/*                    alert(fb_type);
+                    alert(fb_dwbj);
+                    alert(fb_customer_vo);
+                    alert(fb_sjcb);
+                    alert(fb_fb_vo);*/
+                    $("#ys_" + fb_type + "_sjmll").val(Math.round(fb_sjmll * 10000)/100 + "%");
+                }
+            });
+        }
+        //single total_mll
+        function get_single_total_mll(domDiv){
+            //total kgmll
+            var fb_dwbj = $("#ys_hj_cg_dwbj").val() || 0.00;
+            var fb_nkje = $("#ys_hj_cg_nkje").val() || 0.00;
+            var fb_kgmll = 0.00;
+            if(fb_dwbj > 0.00 ){
+                fb_kgmll = (parseFloat(fb_dwbj) - parseFloat(fb_nkje))/parseFloat(fb_dwbj) ;
+            }
+            $("#ys_hj_cg_kgmll").val(Math.round(fb_kgmll * 10000)/100 + "%");
+            //total sjmll
+             var fb_customer_vo = $("#ys_hj_cg_customer_vo").val() || 0.00;
+             var fb_sjcb = $("#cg_hj_cg_sjcb").val() || 0.00;
+             var fb_fb_vo = $("#cg_hj_cg_vo").val() || 0.00;
+             var fb_sjmll = 0.00;
+             if(fb_dwbj > 0.00 ){
+                 fb_sjmll = (parseFloat(fb_dwbj) + parseFloat(fb_customer_vo) - parseFloat(fb_sjcb) - parseFloat(fb_fb_vo))/(parseFloat(fb_dwbj) + parseFloat(fb_customer_vo)) ;
+                 //Math.round(x*100)/100
+                 $("#cg_cg_all_sjmll").val(Math.round(fb_sjmll * 10000)/100 + "%");
+                 $("#cg_hj_cg_sjmll").val(Math.round(fb_sjmll * 10000)/100 + "%");
+             }
+        }
+        //zj total
+        function get_total_zj(domDiv){
+            //fb
+            var fb_dwbj = $("#ys_hj_dwbj").val() || 0.00;
+            var fb_customer_vo = $("#ys_hj_customer_vo").val() || 0.00;
+            var fb_nkje = $("#ys_hj_nkje").val() || 0.00;
+            var fb_sjcb = $("#ys_hj_sjcb").val() || 0.00;
+            var fb_vo = $("#ys_hj_fb_vo").val() || 0.00;
+            //cg
+            var cg_dwbj = $("#ys_hj_cg_dwbj").val() || 0.00;
+            var cg_customer_vo = $("#ys_hj_cg_customer_vo").val() || 0.00;
+            var cg_nkje = $("#ys_hj_cg_nkje").val() || 0.00;
+            var cg_sjcb = $("#cg_hj_cg_sjcb").val() || 0.00;
+            var cg_vo = $("#cg_hj_cg_vo").val() || 0.00;
+            //qq
+            var qq_dwbj = $("#ys_qq_dwbj").val() || 0.00;
+            var qq_customer_vo = $("#ys_qq_customer_vo").val() || 0.00;
+            var qq_nkje = $("#ys_qq_nkje").val() || 0.00;
+            var qq_sjcb = $("#ys_qq_sjcb").val() || 0.00;
+            var qq_vo = $("#ys_qq_vo").val() || 0.00;
+            //rg
+            var rg_dwbj = $("#ys_rg_dwbj").val() || 0.00;
+            var rg_customer_vo = 0.00;
+            var rg_nkje = $("#ys_rg_nkje").val() || 0.00;
+            var rg_sjcb = $("#ys_rg_sjcb").val() || 0.00;
+            var rg_vo = 0.00;
+            //qt
+            var qt_dwbj = $("#ys_qt_dwbj").val() || 0.00;
+            var qt_customer_vo = $("#ys_qt_customer_vo").val() || 0.00;
+            var qt_nkje = $("#ys_qt_nkje").val() || 0.00;
+            var qt_sjcb = $("#ys_qt_sjcb").val() || 0.00;
+            var qt_vo = $("#ys_qt_vo").val() || 0.00;
+            //
+            var zj_dwbj = parseFloat(fb_dwbj) + parseFloat(cg_dwbj) + parseFloat(qq_dwbj) + parseFloat(rg_dwbj) + parseFloat(qt_dwbj);
+            var zj_customer_vo = parseFloat(fb_customer_vo) + parseFloat(cg_customer_vo) + parseFloat(qq_customer_vo) + parseFloat(rg_customer_vo) + parseFloat(qt_customer_vo);
+            var zj_nkje = parseFloat(fb_nkje) + parseFloat(cg_nkje) + parseFloat(qq_nkje) + parseFloat(rg_nkje) + parseFloat(qt_nkje);
+            var zj_sjcb = parseFloat(fb_sjcb) + parseFloat(cg_sjcb) + parseFloat(qq_sjcb) + parseFloat(rg_sjcb) + parseFloat(qt_sjcb);
+            var zj_vo = parseFloat(fb_vo) + parseFloat(cg_vo) + parseFloat(qq_vo) + parseFloat(rg_vo) + parseFloat(qt_vo);
+            //
+            var zj_kgmll = 0.00;
+            if(zj_dwbj > 0.00 ){
+                zj_kgmll = (parseFloat(zj_dwbj) - parseFloat(zj_nkje))/parseFloat(zj_dwbj) ;
+            }
+            //total sjmll
+            var zj_sjmll = 0.00;
+            if(zj_dwbj > 0.00 ){
+                zj_sjmll = (parseFloat(zj_dwbj) + parseFloat(zj_customer_vo) - parseFloat(zj_sjcb) - parseFloat(zj_vo))/(parseFloat(zj_dwbj) + parseFloat(zj_customer_vo)) ;
+                //Math.round(x*100)/100
+            }
+            //set
+            $("#zj_dwbj").val(zj_dwbj);
+            $("#zj_customer_vo").val(zj_customer_vo);
+            $("#zj_nkje").val(zj_nkje);
+            $("#zj_sjcb").val(zj_sjcb);
+            $("#zj_vo").val(zj_vo);
+            $("#zj_kgmll").val(Math.round(zj_kgmll * 10000)/100 + "%");
+            $("#zj_sjmll").val(Math.round(zj_sjmll * 10000)/100 + "%");
+            //
+            $("#span_zj_htjs").text(zj_dwbj + zj_customer_vo);
+            $("#span_zj_kgmll").text(Math.round(zj_kgmll * 10000)/100 + "%");
+            $("#span_zj_sjmll").text(Math.round(zj_sjmll * 10000)/100 + "%");
+            //平衡值
+            $("#span_zj_dwbj_phz").text($("#ys_hetong_amt").val() - zj_dwbj);
+        }
+        //--------------------------------------------------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------
+        //单字段 合计
+        //--------------------------------------------------------------------------------------------
+        //add single 前期 blur
+        function add_single_type_hj_event(domDiv,lineType,hjType,domResult){
+            $("#" + domDiv + " [jb_" + lineType + "_hj=" + hjType + "]").each(function(){
+                $(this).on('blur',function(){
+                    if("nkje" == hjType){
+                        var cur_id = $(this).attr("id");
+                        var cur_dwbj_id = cur_id.substring(0,cur_id.lastIndexOf("_")) + "_dwbj";
+                        //alert(cur_dwbj_id);
+                        var nkje = parseFloat($(this).val()) || 0.00;
+                        //alert(nkje);
+                        var dwbj =  parseFloat($("#" + cur_dwbj_id).val()) || 0.00;
+                        //alert(dwbj);
+                        if(nkje > dwbj){
+                            alert("内控金额 大于 对外报价！");
+                            $(this).focus();
+                            return;
+                        }
+                    }
+                    //single
+                    get_single_mll("module_xmcbgl","jb_" + lineType + "_kgmll");
+                    get_single_mll("module_xmcbgl","jb_" + lineType + "_sjmll");
+                    //no hj
+                    //$("#" + domResult).val(parseFloat($(this).val()) || 0.00);
+                    //no total
+                    //get_single_total_mll("module_xmcbgl");
+                    //zj
+                    get_total_zj("module_xmcbgl");
+                });
+            });
+        }
+        //--------------------------------------------------------------------------------------------------------------
+        //弹窗: 子表1
+        //-------------------------------------------------------------------------------------------
+        function setVoJqGrid(domTableId,domPageId,srctype,cur_pro_id,cur_vo_type,domResultId){
+            //console.log(cur_pro_id);
+            //console.log(cur_vo_type);
+            var $gridobj = jQuery(domTableId).jqGrid({
+                url:'/index.php/Home/DbOpt/ajaxVoSearch',
+                datatype: "json",
+                mtype: 'POST',
+                postData: {pro_id:cur_pro_id,srctype:srctype,vo_type:cur_vo_type},
+                colNames:['ID','描述','金额','原因'],
+                colModel:[
+                    {name:'id',index:'id',
+                        width:20,align:"right",
+                        sortable:true,
+                        editable:false,
+                        readonly:true,
+                        editoptions:{readonly:true,size:100}
+                    },
+                    {name:'vo_desc',index:'vo_desc',
+                        width:50,align:"right",
+                        sortable:true,
+                        editable:true, edittype:"text",editrules:{required:true},
+                        editoptions:{size:50},
+                        /*                  editable:true, edittype:"textarea",editrules:{required:true},
+                         editoptions:{rows:"3",cols:"30"},*/
+                        formoptions:{rowpos:4, label: "描述", elmprefix:"(*)"}
+                    },
+                    {name:'vo_je',index:'vo_je',
+                        width:30,align:"right",
+                        sortable:true,
+                        formatter: 'number',
+                        summaryType:'sum',
+                        editable:true, edittype:"text",editrules:{required:true},
+                        editoptions:{size:30},
+                        formoptions:{rowpos:2, label: "金额", elmprefix:"(*)"}
+                    },
+                    {name:'vo_reson',index:'vo_reson',
+                        width:30, align:"center",
+                        sortable:true,
+                        stype:'select',//查询类型
+                        editable:true,edittype:"select",
+                        editoptions:{
+                            value: get_vo_reson_array(srctype),
+                            defaultValue:"A"
+                        },
+                        editrules:{required:true},
+                        formoptions:{ rowpos:3,label: "原因",elmprefix:"(*)"}
+                    }
+                ],
+                hiddengrid: false,
+                autowidth: true,
+                rownumbers: true,
+                rowNum:20,
+                rowList:[10,20,30],
+                pager: domPageId,
+                viewrecords: true,
+                sortorder: "desc",
+                forceFit : true,
+                editurl: '/index.php/Home/DbOpt/ajaxVoSave',
+                caption:"",
+                footerrow : true,
+                gridComplete: function() {
+                    var rowNum = parseInt(jQuery(domTableId).jqGrid('getGridParam','records',10));
+                    if(rowNum > 0){
+                        var hj_je  = jQuery(domTableId).jqGrid('getCol','vo_je',false,'sum');
+                        jQuery(domTableId).jqGrid('footerData',"set",{id:'合计:',vo_je:hj_je});
+                        $("#" + domResultId).val(hj_je);
+                    }
+                },
+                onSelectRow: function(id){
+                }
+            });
+
+            //导航栏配置和CRUD函数
+            jQuery(domTableId).jqGrid('navGrid',domPageId,
+                    {view:true,search:false,edit:false,add:false,del:true}
+            );
+            //
+            var addparameters = {
+                rowID : "new_row",
+                initdata : {},
+                position :"first",
+                useDefValues : false,
+                useFormatter : false,
+                addRowParams : {
+                    extraparam:{pro_id:cur_pro_id,srctype:srctype,vo_type:cur_vo_type},
+                    successfunc : function(xhr){
+                        //alert("successfunc");
+                        //console.log(xhr);
+                        var result = eval('(' + xhr.responseText + ')');
+                        if(true == result.state){
+                            //alert(result.msg);
+                            //alert(result.msg);
+                            //重新载入,自动调用
+                            //$gridobj.trigger("reloadGrid"); //重新载入
+                            //alert(result.id);
+                            //jQuery(domTableId).setCell (1,1,result.id);
+                            jQuery(domTableId).trigger("reloadGrid");
+                            return true;
+                        }else{
+                            jAlert(result.msg);
+                            return true;
+                        }
+                    }
+                }
+            }
+            //
+            var editparameters = {
+                "keys" : false,
+                "oneditfunc" : null,
+                "successfunc" : function(xhr){
+                    //alert("successfunc");
+                    //console.log(xhr);
+                    var result = eval('(' + xhr.responseText + ')');
+                    if(true == result.state){
+                        //alert(result.msg);
+                        jQuery(domTableId).trigger("reloadGrid");
+                        return true;
+                    }else{
+                        jAlert(result.msg);
+                        return true;
+                    }
+                },
+                "url" : null,
+                "extraparam" : {pro_id:cur_pro_id,srctype:srctype,vo_type:cur_vo_type},
+                "aftersavefunc" : null,
+                "errorfunc": null,
+                "afterrestorefunc" : null,
+                "restoreAfterError" : true,
+                "mtype" : "POST"
+            }
+            var parameters = {
+                edit: true,
+                editicon: "ui-icon-pencil",
+                add: true,
+                addicon:"ui-icon-plus",
+                save: true,
+                saveicon:"ui-icon-disk",
+                cancel: true,
+                cancelicon:"ui-icon-cancel",
+                addParams : addparameters,
+                editParams : editparameters
+            }
+            jQuery(domTableId).jqGrid('inlineNav',domPageId,parameters);
+
+
+            //其他配置
+            jQuery(domTableId).jqGrid('gridResize',{minWidth:350,maxWidth:1000,minHeight:80, maxHeight:350});
+            jQuery(domTableId).jqGrid('sortableRows');
+            /*        jQuery(domTableId).jqGrid('filterToolbar');
+             $gridobj[0].toggleToolbar();
+             if($(domPageId + ":contains(Toggle)").length < 1){
+             jQuery(domTableId).jqGrid('navButtonAdd',domPageId,{caption:"Toggle",title:"Toggle Search Toolbar", buttonicon :'ui-icon-pin-s',
+             onClickButton:function(){
+             $gridobj[0].toggleToolbar();
+             }
+             });
+             }*/
+        }
+        function get_fb_type_str(dep_sx){
+            var fb_arr = {
+                'zx':"装修",
+                'dq':"电气",
+                'kt':"空调",
+                'xf':"消防",
+                'jps':"给排水",
+                'it':"IT",
+                'sec':"SEC",
+                'av':"AV"
+            };
+            return fb_arr[dep_sx];
+        }
+        function get_vo_reson_array(srctype){
+            var customer_vo_arr = {
+                '0':"全部",
+                'A': "客户变更",
+                'B': "范围变更",
+                'C': "代客户采购",
+                'D': "设计公司变更",
+                'E': "大厦或消防要求",
+                'F': "现场条件不符",
+                'G': "其它"
+            };
+            var fb_vo_arr = {
+                '0':"全部",
+                'A' : "客户要求-有VO",
+                'B' : "客户要求-无VO",
+                'C' : "分包(或供应商)报价范围变更",
+                'D' : "装修设计疏漏",
+                'E' : "机电设计疏漏",
+                'F' : "预算漏项或少算",
+                'G' : "现场控制疏漏",
+                'H' : "采购疏漏",
+                'I' : "其它"
+            };
+            if("customer" == srctype){
+                return customer_vo_arr;
+            }else if("fb" == srctype){
+                return fb_vo_arr;
+            }else if("zxcg" == srctype || "jdcg" == srctype || "qq" == srctype){
+                return fb_vo_arr;
+            }
+            return {};
+        }
+        function showVOJqGriddialog(domDialogId,srctype,vo_type,domResultId){
+            var title = "";
+            if("customer" == srctype){
+                title = "客户VO :  " + (get_fb_type_str(vo_type) || "采购");
+            }else if("fb" == srctype){
+                title = "分包VO :  " + get_fb_type_str(vo_type);
+            }
+            var dialogOpts = {
+                title: title,
+                bgiframe: true,
+                resizable: true,
+                width: 800,
+                height:500,
+                //autoOpen: false,
+                modal: true,
+                overlay: {
+                    backgroundColor: '#000',
+                    opacity: 0.5
+                },
+                open: function() {
+                    setVoJqGrid("#" + srctype + "_" + vo_type + "_dg","#" + srctype + "_p" + vo_type + "_dg",srctype,$("#pro_id").val(),vo_type,domResultId);
+                },
+                buttons: {
+                    "Ok": function() {
+                        $(this).dialog('close');
+                    } ,
+                    "Cancel": function() {
+                        $(this).dialog('close');
+                    }
+                }
+            }
+            $(domDialogId).dialog(dialogOpts);
+            //$(domDialogId).dialog('open');
+        }
+        //-------------------------------------------------------------------------------------------
+        //弹窗: 子表2
+        //-------------------------------------------------------------------------------------------
+        function getColModel_CgAndQQName(indexname,rowpos,label,srctype,require){
+            if("qq" == srctype){
+                return {
+                    name:indexname,
+                    index:indexname,
+                    width:50,
+                    align:"center",
+                    sortable:true,
+                    editable:false, edittype:"text",
+                    editrules:{required: false},
+                    editoptions:{
+                        size:"50"
+                    },
+                    formoptions:{rowpos:rowpos, label: label, elmprefix:"(*)"}
+                };
+            }
+            return {
+                name:indexname,
+                index:indexname,
+                width:30,
+                align:"center",
+                sortable:true,
+                editable:true, edittype:"text",
+                editrules:{required: (typeof(require )== "undefined") ? true : require},
+                editoptions:{
+                    size:"30"
+                },
+                formoptions:{rowpos:rowpos, label: label, elmprefix:"(*)"}
+            };
+        }
+        function setCgAndVoJqGrid(domTableId,domPageId,srctype,cur_pro_id,domResultId){
+            //console.log(cur_pro_id);
+            //console.log(cur_vo_type);
+            var $gridobj = jQuery(domTableId).jqGrid({
+                url:'/index.php/Home/DbOpt/ajaxCgAndVoSearch',
+                datatype: "json",
+                mtype: 'POST',
+                postData: {pro_id:cur_pro_id,srctype:srctype},
+                colNames:['ID','名称','金额','描述','VO1 金额','VO1 原因','VO1 描述','VO2 金额','VO2 原因','VO2 描述','VO3 金额','VO3 原因','VO3 描述'],
+                colModel:[
+                    {name:'id',index:'id',
+                        width:20,align:"right",
+                        sortable:true,
+                        editable:false,
+                        readonly:true,
+                        editoptions:{readonly:true,size:100}
+                    },
+                    getColModel_CgAndQQName("cg_name",2,"名称",srctype)
+                    ,
+                    {name:'cg_je',index:'cg_je',
+                        width:30,align:"right",
+                        sortable:true,
+                        formatter: 'number',
+                        summaryType:'sum',
+                        editable:true, edittype:"text",editrules:{required:true},
+                        editoptions:{size:30},
+                        formoptions:{rowpos:3, label: "金额", elmprefix:"(*)"}
+                    },
+                    {name:'cg_desc',index:'cg_desc',
+                        width:50,align:"right",
+                        sortable:true,
+                        editable:true, edittype:"text",editrules:{required:true},
+                        editoptions:{size:50},
+                        /*                  editable:true, edittype:"textarea",editrules:{required:true},
+                         editoptions:{rows:"3",cols:"30"},*/
+                        formoptions:{rowpos:4, label: "描述", elmprefix:"(*)"}
+                    },
+                    {name:'vo1_je',index:'vo1_je',
+                        width:30,align:"right",
+                        sortable:true,
+                        formatter: 'number',
+                        summaryType:'sum',
+                        editable:true, edittype:"text",editrules:{required:false},
+                        editoptions:{size:30},
+                        formoptions:{rowpos:5, label: "VO1 金额", elmprefix:"(*)"}
+                    },
+                    {name:'vo1_reson',index:'vo1_reson',
+                        width:70, align:"center",
+                        sortable:true,
+                        stype:'select',//查询类型
+                        editable:true,edittype:"select",
+                        editoptions:{
+                            value: get_vo_reson_array(srctype),
+                            defaultValue:"A"
+                        },
+                        editrules:{required:false},
+                        formoptions:{ rowpos:6,label: "VO1 原因",elmprefix:"(*)"}
+                    },
+                    {name:'vo1_desc',index:'vo1_desc',
+                        width:50,align:"right",
+                        sortable:true,
+                        editable:true, edittype:"text",editrules:{required:false},
+                        editoptions:{size:50},
+                        /*                  editable:true, edittype:"textarea",editrules:{required:true},
+                         editoptions:{rows:"3",cols:"30"},*/
+                        formoptions:{rowpos:7, label: "VO1 描述", elmprefix:"(*)"}
+                    },
+                    {name:'vo2_je',index:'vo2_je',
+                        width:30,align:"right",
+                        sortable:true,
+                        formatter: 'number',
+                        summaryType:'sum',
+                        editable:true, edittype:"text",editrules:{required:false},
+                        editoptions:{size:30},
+                        formoptions:{rowpos:8, label: "VO2 金额", elmprefix:"(*)"}
+                    },
+                    {name:'vo2_reson',index:'vo2_reson',
+                        width:30, align:"center",
+                        sortable:true,
+                        stype:'select',//查询类型
+                        editable:true,edittype:"select",
+                        editoptions:{
+                            value: get_vo_reson_array(srctype),
+                            defaultValue:"A"
+                        },
+                        editrules:{required:false},
+                        formoptions:{ rowpos:9,label: "VO2 原因",elmprefix:"(*)"}
+                    },
+                    {name:'vo2_desc',index:'vo2_desc',
+                        width:30,align:"right",
+                        sortable:true,
+                        editable:true, edittype:"text",editrules:{required:false},
+                        editoptions:{size:30},
+                        /*                  editable:true, edittype:"textarea",editrules:{required:true},
+                         editoptions:{rows:"3",cols:"30"},*/
+                        formoptions:{rowpos:10, label: "VO2 描述", elmprefix:"(*)"}
+                    },
+                    {name:'vo3_je',index:'vo3_je',
+                        width:20,align:"right",
+                        sortable:true,
+                        formatter: 'number',
+                        summaryType:'sum',
+                        editable:true, edittype:"text",editrules:{required:false},
+                        editoptions:{size:20},
+                        formoptions:{rowpos:11, label: "VO3 金额", elmprefix:"(*)"}
+                    },
+                    {name:'vo3_reson',index:'vo3_reson',
+                        width:20, align:"center",
+                        sortable:true,
+                        stype:'select',//查询类型
+                        editable:true,edittype:"select",
+                        editoptions:{
+                            value: get_vo_reson_array(srctype),
+                            defaultValue:"A"
+                        },
+                        editrules:{required:false},
+                        formoptions:{ rowpos:12,label: "VO3 原因",elmprefix:"(*)"}
+                    },
+                    {name:'vo3_desc',index:'vo3_desc',
+                        width:20,align:"right",
+                        sortable:true,
+                        editable:true, edittype:"text",editrules:{required:false},
+                        editoptions:{size:20},
+                        /*                  editable:true, edittype:"textarea",editrules:{required:true},
+                         editoptions:{rows:"3",cols:"30"},*/
+                        formoptions:{rowpos:13, label: "VO3 描述", elmprefix:"(*)"}
+                    }
+                ],
+                hiddengrid: false,
+                autowidth: true,
+                rownumbers: true,
+                rowNum:30,
+                rowList:[10,20,30],
+                pager: domPageId,
+                viewrecords: true,
+                sortorder: "asc",
+                forceFit : true,
+                editurl: '/index.php/Home/DbOpt/ajaxCgAndVoSave',
+                caption:"",
+                footerrow : true,
+                gridComplete: function() {
+                    var rowNum = parseInt(jQuery(domTableId).jqGrid('getGridParam','records',10));
+                    if(rowNum > 0){
+                        var cg_hj_je  = jQuery(domTableId).jqGrid('getCol','cg_je',false,'sum');
+                        var vo1_hj_je  = jQuery(domTableId).jqGrid('getCol','vo1_je',false,'sum');
+                        var vo2_hj_je  = jQuery(domTableId).jqGrid('getCol','vo2_je',false,'sum');
+                        var vo3_hj_je  = jQuery(domTableId).jqGrid('getCol','vo3_je',false,'sum');
+                        jQuery(domTableId).jqGrid('footerData',"set",{id:'合计:',cg_je:cg_hj_je,vo1_je:vo1_hj_je,vo2_je:vo2_hj_je,vo3_je:vo3_hj_je});
+                        //
+                        var it_arr = domResultId.split("_");
+                        var domSjcb = it_arr[0] + "_" + it_arr[1] + "_sjcb";
+                        var domVo = it_arr[0] + "_" + it_arr[1] + "_vo";
+                        $("#" + domSjcb).val(cg_hj_je);
+                        var vo_all = (parseFloat(vo1_hj_je) || 0.00) + (parseFloat(vo2_hj_je) || 0.00) + (parseFloat(vo3_hj_je) || 0.00);
+                        $("#" + domVo).val(vo_all);
+                    }
+                },
+                onSelectRow: function(id){
+                }
+            });
+
+            //导航栏配置和CRUD函数
+            if("qq" == srctype){
+                jQuery(domTableId).jqGrid('navGrid',domPageId,
+                        {view:true,search:false,edit:false,add:false,del:false}
+                );
+            }else{
+                jQuery(domTableId).jqGrid('navGrid',domPageId,
+                        {view:true,search:false,edit:false,add:false,del:true}
+                );
+            }
+            //
+            var addparameters = {
+                rowID : "new_row",
+                initdata : {},
+                position :"first",
+                useDefValues : false,
+                useFormatter : false,
+                addRowParams : {
+                    extraparam:{pro_id:cur_pro_id,srctype:srctype},
+                    successfunc : function(xhr){
+                        var result = eval('(' + xhr.responseText + ')');
+                        if(true == result.state){
+                            jQuery(domTableId).trigger("reloadGrid");
+                            return true;
+                        }else{
+                            jAlert(result.msg);
+                            return true;
+                        }
+                    }
+                }
+            }
+            //
+            var editparameters = {
+                "keys" : false,
+                "oneditfunc" : null,
+                "successfunc" : function(xhr){
+                    var result = eval('(' + xhr.responseText + ')');
+                    if(true == result.state){
+                        jQuery(domTableId).trigger("reloadGrid");
+                        return true;
+                    }else{
+                        jAlert(result.msg);
+                        return true;
+                    }
+                },
+                "url" : null,
+                "extraparam" : {pro_id:cur_pro_id,srctype:srctype},
+                "aftersavefunc" : null,
+                "errorfunc": null,
+                "afterrestorefunc" : null,
+                "restoreAfterError" : true,
+                "mtype" : "POST"
+            }
+            //
+            var add_flag = true;
+            if("qq" == srctype){
+                add_flag = false;
+            }
+            var parameters = {
+                edit: true,
+                editicon: "ui-icon-pencil",
+                add: add_flag,
+                addicon:"ui-icon-plus",
+                save: true,
+                saveicon:"ui-icon-disk",
+                cancel: true,
+                cancelicon:"ui-icon-cancel",
+                addParams : addparameters,
+                editParams : editparameters
+            }
+            jQuery(domTableId).jqGrid('inlineNav',domPageId,parameters);
+            //其他配置
+            jQuery(domTableId).jqGrid('gridResize',{minWidth:350,maxWidth:1000,minHeight:350, maxHeight:350});
+            jQuery(domTableId).jqGrid('sortableRows');
+            /*        jQuery(domTableId).jqGrid('filterToolbar');
+             $gridobj[0].toggleToolbar();
+             if($(domPageId + ":contains(Toggle)").length < 1){
+             jQuery(domTableId).jqGrid('navButtonAdd',domPageId,{caption:"Toggle",title:"Toggle Search Toolbar", buttonicon :'ui-icon-pin-s',
+             onClickButton:function(){
+             $gridobj[0].toggleToolbar();
+             }
+             });
+             }*/
+        }
+        function showCgAndVOJqGriddialog(domDialogId,srctype,domResultId){
+            var title = "";
+            if("zxcg" == srctype){
+                title = "装修采购";
+            }else if("jdcg" == srctype){
+                title = "机电采购";
+            }else if("qq" == srctype){
+                title = "前期费用";
+            }
+            var dialogOpts = {
+                title: title,
+                bgiframe: true,
+                resizable: true,
+                width: 1200,
+                height:500,
+                //autoOpen: false,
+                modal: true,
+                overlay: {
+                    backgroundColor: '#000',
+                    opacity: 0.5
+                },
+                open: function() {
+                    setCgAndVoJqGrid("#" + srctype + "_dg","#p" + srctype + "_dg",srctype,$("#pro_id").val(),domResultId);
+                },
+                buttons: {
+                    "Ok": function() {
+                        $(this).dialog('close');
+                    } ,
+                    "Cancel": function() {
+                        $(this).dialog('close');
+                    }
+                }
+            }
+            $(domDialogId).dialog(dialogOpts);
+        }
+        function get_cg_and_vo_hj(){
+            var ret = $.get("/index.php/Home/DbOpt/ajaxGetCgAndVOJe?pro_id=" + $("#pro_id").val(), function(xhr){
+                //console.log(xhr);
+                $.each(xhr,function(index,element){
+                    //alert(index);
+                    //alert(element);
+                    if("zxcg" == index || "jdcg" == index){
+                        $.each(element,function(index2,element2){
+                            $("#cg_" + index + "_" + index2).val(element2);
+                        });
+                    }else if("qq" == index){
+                        $.each(element,function(index2,element2){
+                            $("#ys_" + index + "_" + index2).val(element2);
+                        });
+                    }
+
+                });
+                //
+                get_comm_hj("module_xmcbgl","cg_sjcb","cg_hj_cg_sjcb");
+                get_comm_hj("module_xmcbgl","cg_vo","cg_hj_cg_vo");
+                //
+                get_single_mll("module_xmcbgl","jb_qq_kgmll");
+                get_single_mll("module_xmcbgl","jb_qq_sjmll");
+                //
+            });
+            return ret;
+        }
+        //add cg blur
+        function add_cg_hj_event(domDiv,hjType,domResult){
+            $("#" + domDiv + " [jb_hj=" + hjType + "]").each(function(){
+                $(this).on('blur',function(){
+                    //hj
+                    get_comm_hj(domDiv,hjType,domResult);
+                    //no mll,only have cg total mll
+                    //cg total
+                    get_single_total_mll("module_xmcbgl");
+                    //zj
+                    get_total_zj("module_xmcbgl");
+                });
+            });
+        }
+        //-------------------------------------------------------------------------------------------
+        //init
+        //-------------------------------------------------------------------------------------------
+        //dwbj
+        add_comm_hj_event("module_xmcbgl","dwbj","ys_hj_dwbj");
+        get_comm_hj("module_xmcbgl","dwbj","ys_hj_dwbj");
+        //nkje
+        add_comm_hj_event("module_xmcbgl","nkje","ys_hj_nkje");
+        get_comm_hj("module_xmcbgl","nkje","ys_hj_nkje");
+        //sjcb
+        add_comm_hj_event("module_xmcbgl","sjcb","ys_hj_sjcb");
+        get_comm_hj("module_xmcbgl","sjcb","ys_hj_sjcb");
+        //customer vo,fb vo
+        add_comm_hj_event("module_xmcbgl","customer_vo","ys_hj_customer_vo");
+        add_comm_hj_event("module_xmcbgl","fb_vo","ys_hj_fb_vo");
+        //
+        //
+        //-------------------------------------------------------------------------------------------
+        //弹窗 1: click
+        //-------------------------------------------------------------------------------------------
+        $('.module').on('click','[jb_field=jb_multi_save]',function(event){
+            var domSrc = event.target.id;
+            //alert(domSrc);
+            var vo_type = domSrc.split("_")[1];
+            var srctype = domSrc.split("_")[2];
+            //alert(vo_type);
+            showVOJqGriddialog("#" + srctype + "_" + vo_type + "_dialog",srctype,vo_type,domSrc);
+            return false;
+        });
+        //-------------------------------------------------------------------------------------------
+        //弹窗 2: click
+        //-------------------------------------------------------------------------------------------
+        $('.module').on('click','[jb_field=jb_multi_cg_save]',function(event){
+            var domSrc = event.target.id;
+            //alert(domSrc);
+            var srctype = domSrc.split("_")[1];
+            showCgAndVOJqGriddialog("#" + srctype + "_dialog",srctype,domSrc);
+            return false;
+        });
+/*        //-------------------------------------------------------------------------------------------
+        //弹窗 3: click
+        //-------------------------------------------------------------------------------------------
+        $('.module').on('click','[jb_field=jb_multi_qq_save]',function(event){
+            var domSrc = event.target.id;
+            //alert(domSrc);
+            var srctype = domSrc.split("_")[1];
+            showCgAndVOJqGriddialog("#" + srctype + "_dialog",srctype,domSrc);
+            return false;
+        });*/
+        //
+        //single dwbj
+        add_single_hj_event("module_xmcbgl","dwbj","ys_hj_cg_dwbj");
+        $("#ys_hj_cg_dwbj").val(parseFloat($("#ys_cg_all_dwbj").val()) || 0.00);
+        //single nkje
+        add_single_hj_event("module_xmcbgl","nkje","ys_hj_cg_nkje");
+        $("#ys_hj_cg_nkje").val(parseFloat($("#ys_cg_all_nkje").val()) || 0.00);
+        //single add hj blur
+        add_single_hj_event("module_xmcbgl","customer_vo","ys_hj_cg_customer_vo");
+        //cg mulit add hj blur
+        add_cg_hj_event("module_xmcbgl","cg_sjcb","cg_hj_cg_sjcb");
+        add_cg_hj_event("module_xmcbgl","cg_vo","cg_hj_cg_vo");
+        //qq add hj blur
+        add_single_type_hj_event("module_xmcbgl","qq","dwbj","");
+        add_single_type_hj_event("module_xmcbgl","qq","customer_vo","");
+        add_single_type_hj_event("module_xmcbgl","qq","nkje","");
+        add_single_type_hj_event("module_xmcbgl","qq","sjcb","");
+        add_single_type_hj_event("module_xmcbgl","qq","qq_vo","");
+        //rg add hj blur
+        add_single_type_hj_event("module_xmcbgl","rg","dwbj","");
+        add_single_type_hj_event("module_xmcbgl","rg","nkje","");
+        add_single_type_hj_event("module_xmcbgl","rg","sjcb","");
+        //qt add hj blur
+        add_single_type_hj_event("module_xmcbgl","qt","dwbj","");
+        add_single_type_hj_event("module_xmcbgl","qt","customer_vo","");
+        add_single_type_hj_event("module_xmcbgl","qt","nkje","");
+        add_single_type_hj_event("module_xmcbgl","qt","sjcb","");
+        add_single_type_hj_event("module_xmcbgl","qt","qt_vo","");
+        //jquery promise init.
+        $.when(get_all_vo_hj("customer"),get_all_vo_hj("fb"),get_cg_and_vo_hj())
+                .done(function(){
+                    get_comm_mll("module_xmcbgl","jb_kgmll");
+                    get_comm_mll("module_xmcbgl","jb_sjmll");
+                    get_comm_total_mll("module_xmcbgl");
+                    //single
+                    get_single_mll("module_xmcbgl","jb_single_kgmll");
+                    get_single_total_mll("module_xmcbgl");
+                    //qq
+                    get_single_mll("module_xmcbgl","jb_qq_kgmll");
+                    get_single_mll("module_xmcbgl","jb_qq_sjmll");
+                    //rg
+                    get_single_mll("module_xmcbgl","jb_rg_kgmll");
+                    get_single_mll("module_xmcbgl","jb_rg_sjmll");
+                    //qt
+                    get_single_mll("module_xmcbgl","jb_qt_kgmll");
+                    get_single_mll("module_xmcbgl","jb_qt_sjmll");
+                    //zj
+                    get_total_zj("module_xmcbgl");
+                });
+        //
+        //get fb and cg hetong sjcb
+        function get_cbgl_chart_need_data(){
+                var ret = $.get("/index.php/Home/Fusion/ajaxGetCbgl?pro_id=" + $("#pro_id").val(), function(response){
+                    var cbgl_1_Chart = new FusionCharts( "__PUBLIC__/js/Lib/FusionCharts/Charts/MSCombiDY2D.swf",// MSCombiDY2D.swf MSColumn2D.swf  MSBar2D.swf
+                            "cbgl_1_ChartId", "1400", "500", "0", "1" );
+                    cbgl_1_Chart.setJSONData({
+                        "chart":
+                        {
+                            "caption": "成本管理1",
+                            "showlabels": "1",
+                            "showvalues": "1",
+                            "decimals": "0",
+                            "numberprefix": "",
+                            "placevaluesinside": "1",
+                            "rotatevalues": "0",
+                            "basefont":"Arial",
+                            "basefontsize":"15",
+                            "basefontcolor":"000000"
+                        },
+                        "categories":response.categories1,
+                        "dataset" :response.dataset1,
+                        "trendlines":{
+                            "line":[{
+                                    "parentYAxis": "S",
+                                    "startvalue":"0.8",
+                                    "color":"009933",
+                                    "displayvalue":"比率 80%"
+                                }
+                            ]
+                        }
+                    });
+                    cbgl_1_Chart.render("cbgl_1_chartContainer");
+                    //-------------------------------------------------------------------------------------------------------------
+                    var cbgl_2_Chart = new FusionCharts( "__PUBLIC__/js/Lib/FusionCharts/Charts/MSCombiDY2D.swf",// MSCombiDY2D.swf MSColumn2D.swf  MSBar2D.swf
+                            "cbgl_2_ChartId", "1400", "500", "0", "1" );
+                    cbgl_2_Chart.setJSONData({
+                        "chart":
+                        {
+                            "caption": "成本管理2",
+                            "showlabels": "1",
+                            "showvalues": "1",
+                            "decimals": "0",
+                            "numberprefix": "",
+                            "placevaluesinside": "1",
+                            "rotatevalues": "0",
+                            "basefont":"Arial",
+                            "basefontsize":"15",
+                            "basefontcolor":"000000"
+                        },
+                        "categories":response.categories2,
+                        "dataset" :response.dataset2,
+                        "trendlines":{
+                            "line":[{
+                                    "parentYAxis": "S",
+                                    "startvalue":"0.8",
+                                    "color":"009933",
+                                    "displayvalue":"比率 80%"
+                                }
+                            ]
+                        }
+                    });
+                    cbgl_2_Chart.render("cbgl_2_chartContainer");
+                });
+            return ret;
+        }
+        $.when(get_cbgl_chart_need_data())
+                .done(function(){
+                   //
+                });
+        //-------------------------------------------------------------------------------------------
+    });
+</script>
+<style type="text/css">
+/*    table
+    {
+        border-collapse: collapse;
+        border: none;
+        width: 200px;
+    }
+    td
+    {
+        border: solid #000 1px;
+    }*/
+</style>
+
+<div id="customer_dialog">
+    <div id="customer_zx_dialog">
+        <table id="customer_zx_dg"></table>
+        <div id="customer_pzx_dg"></div>
+    </div>
+    <div id="customer_dq_dialog">
+        <table id="customer_dq_dg"></table>
+        <div id="customer_pdq_dg"></div>
+    </div>
+    <div id="customer_kt_dialog">
+        <table id="customer_kt_dg"></table>
+        <div id="customer_pkt_dg"></div>
+    </div>
+    <div id="customer_xf_dialog">
+        <table id="customer_xf_dg"></table>
+        <div id="customer_pxf_dg"></div>
+    </div>
+    <div id="customer_jps_dialog">
+        <table id="customer_jps_dg"></table>
+        <div id="customer_pjps_dg"></div>
+    </div>
+    <div id="customer_it_dialog">
+        <table id="customer_it_dg"></table>
+        <div id="customer_pit_dg"></div>
+    </div>
+    <div id="customer_sec_dialog">
+        <table id="customer_sec_dg"></table>
+        <div id="customer_psec_dg"></div>
+    </div>
+    <div id="customer_av_dialog">
+        <table id="customer_av_dg"></table>
+        <div id="customer_pav_dg"></div>
+    </div>
+    <div id="customer_cg_dialog">
+        <table id="customer_cg_dg"></table>
+        <div id="customer_pcg_dg"></div>
+    </div>
+ </div>
+<div id="fb_dialog">
+    <div id="fb_zx_dialog">
+        <table id="fb_zx_dg"></table>
+        <div id="fb_pzx_dg"></div>
+    </div>
+    <div id="fb_dq_dialog">
+        <table id="fb_dq_dg"></table>
+        <div id="fb_pdq_dg"></div>
+    </div>
+    <div id="fb_kt_dialog">
+        <table id="fb_kt_dg"></table>
+        <div id="fb_pkt_dg"></div>
+    </div>
+    <div id="fb_xf_dialog">
+        <table id="fb_xf_dg"></table>
+        <div id="fb_pxf_dg"></div>
+    </div>
+    <div id="fb_jps_dialog">
+        <table id="fb_jps_dg"></table>
+        <div id="fb_pjps_dg"></div>
+    </div>
+    <div id="fb_it_dialog">
+        <table id="fb_it_dg"></table>
+        <div id="fb_pit_dg"></div>
+    </div>
+    <div id="fb_sec_dialog">
+        <table id="fb_sec_dg"></table>
+        <div id="fb_psec_dg"></div>
+    </div>
+    <div id="fb_av_dialog">
+        <table id="fb_av_dg"></table>
+        <div id="fb_pav_dg"></div>
+    </div>
+</div>
+<div id="cg_dialog">
+    <div id="zxcg_dialog">
+        <table id="zxcg_dg"></table>
+        <div id="pzxcg_dg"></div>
+    </div>
+    <div id="jdcg_dialog">
+        <table id="jdcg_dg"></table>
+        <div id="pjdcg_dg"></div>
+    </div>
+    <div id="qq_dialog">
+        <table id="qq_dg"></table>
+        <div id="pqq_dg"></div>
+    </div>
+</div>
+<div id="module_xmcbgl" class="module">
+    <h3><a href="#">项目成本管理</a></h3>
+    <div>
+        <table jb_table="bordered">
+            <tr>
+                <td>项目财务编号：</td>
+                <td><input type="text" id="ht_xmcwbh" name="ht_xmcwbh" jb_field="" readonly="true" /></td>
+                <td>合同金额：</td>
+                <td>{$ys_hetong_amt}</td>
+                <td>合同结算总金额：</td>
+                <td><span id="span_zj_htjs"></span></td>
+            </tr>
+            <tr>
+                <td>投标毛利率：</td>
+                <td><input type="text" id="ys_tb_mll" name="ys_tb_mll"  style="text-align:right" jb_field="jb_single_save"/>%</td>
+                <td>开工毛利率：</td>
+                <td><span id="span_zj_kgmll"></span></td>
+                <td>实际毛利率：</td>
+                <td><span id="span_zj_sjmll"></span></td>
+            </tr>
+        </table>
+        <br>
+        <table jb_table="table1">
+            <tr>
+                <td>&nbsp;</td>
+                <td style="width:50px;">&nbsp;</td>
+                <td>对外报价</td>
+                <td>客户VO</td>
+                <td>内控金额</td>
+                <td>开工毛利率</td>
+                <td>实际成本</td>
+                <td>实际成本变化
+                <td>实际毛利率</td>
+                <td>说明</td>
+            </tr>
+            <tr>
+                <td rowspan=10>分包：</td>
+                <td>装修</td>
+                <td><input type="text" id="ys_zx_dwbj" name="ys_zx_dwbj" jb_hj="dwbj" jb_field="jb_single_save"/></td>
+                <td><input type="text" id="ys_zx_customer_vo" name="ys_zx_customer_vo" jb_hj="customer_vo" jb_field="jb_multi_save"/></td>
+                <td><input type="text" id="ys_zx_nkje" name="ys_zx_nkje" jb_hj="nkje" jb_field="jb_single_save"/></td>
+                <td><input type="text" id="ys_zx_kgmll" name="ys_zx_kgmll" jb_kgmll="zx" readonly="true"/></td>
+                <td><input type="text" id="ys_zx_sjcb" name="ys_zx_sjcb" jb_hj="sjcb" jb_field="jb_single_save"/></td>
+                <td><input type="text" id="ys_zx_fb_vo" name="ys_zx_fb_vo" jb_hj="fb_vo" jb_field="jb_multi_save"/></td>
+                <td><input type="text" id="ys_zx_sjmll" name="ys_zx_sjmll" jb_sjmll="zx" readonly="true"/></td>
+                <td><input type="text" id="ys_zx_sm" name="ys_zx_sm" jb_field="jb_single_save"/></td>
+            </tr>
+            <tr>
+                <td>电气</td>
+                <td><input type="text" id="ys_dq_dwbj" name="ys_dq_dwbj" jb_hj="dwbj" jb_field="jb_single_save"/></td>
+                <td><input type="text" id="ys_dq_customer_vo" name="ys_dq_customer_vo" jb_hj="customer_vo" jb_field="jb_multi_save"/></td>
+                <td><input type="text" id="ys_dq_nkje" name="ys_dq_nkje" jb_hj="nkje" jb_field="jb_single_save"/></td>
+                <td><input type="text" id="ys_dq_kgmll" name="ys_dq_kgmll" jb_kgmll="dq" readonly="true"/></td>
+                <td><input type="text" id="ys_dq_sjcb" name="ys_dq_sjcb" jb_hj="sjcb" jb_field="jb_single_save"/></td>
+                <td><input type="text" id="ys_dq_fb_vo" name="ys_dq_fb_vo" jb_hj="fb_vo" jb_field="jb_multi_save"/></td>
+                <td><input type="text" id="ys_dq_sjmll" name="ys_dq_sjmll" jb_sjmll="dq" readonly="true"/></td>
+                <td><input type="text" id="ys_dq_sm" name="ys_dq_sm" jb_field="jb_single_save"/></td>
+            </tr>
+            <tr>
+                <td>空调</td>
+                <td><input type="text" id="ys_kt_dwbj" name="ys_kt_dwbj" jb_hj="dwbj" jb_field="jb_single_save"/></td>
+                <td><input type="text" id="ys_kt_customer_vo" name="ys_kt_customer_vo" jb_hj="customer_vo" jb_field="jb_multi_save"/></td>
+                <td><input type="text" id="ys_kt_nkje" name="ys_kt_nkje" jb_hj="nkje" jb_field="jb_single_save"/></td>
+                <td><input type="text" id="ys_kt_kgmll" name="ys_kt_kgmll" jb_kgmll="kt"/></td>
+                <td><input type="text" id="ys_kt_sjcb" name="ys_kt_sjcb" jb_hj="sjcb" jb_field="jb_single_save"/></td>
+                <td><input type="text" id="ys_kt_fb_vo" name="ys_kt_fb_vo" jb_hj="fb_vo" jb_field="jb_multi_save"/></td>
+                <td><input type="text" id="ys_kt_sjmll" name="ys_kt_sjmll" jb_sjmll="kt"/></td>
+                <td><input type="text" id="ys_kt_sm" name="ys_kt_sm" jb_field="jb_single_save"/></td>
+            </tr>
+            <tr>
+                <td>消防</td>
+                <td><input type="text" id="ys_xf_dwbj" name="ys_xf_dwbj" jb_hj="dwbj" jb_field="jb_single_save"/></td>
+                <td><input type="text" id="ys_xf_customer_vo" name="ys_xf_customer_vo" jb_hj="customer_vo" jb_field="jb_multi_save"/></td>
+                <td><input type="text" id="ys_xf_nkje" name="ys_xf_nkje" jb_hj="nkje" jb_field="jb_single_save"/></td>
+                <td><input type="text" id="ys_xf_kgmll" name="ys_xf_kgmll" jb_kgmll="xf" readonly="true"/></td>
+                <td><input type="text" id="ys_xf_sjcb" name="ys_xf_sjcb" jb_hj="sjcb" jb_field="jb_single_save"/></td>
+                <td><input type="text" id="ys_xf_fb_vo" name="ys_xf_fb_vo" jb_hj="fb_vo" jb_field="jb_multi_save"/></td>
+                <td><input type="text" id="ys_xf_sjmll" name="ys_xf_sjmll" jb_sjmll="xf" readonly="true"/></td>
+                <td><input type="text" id="ys_xf_sm" name="ys_xf_sm" jb_field="jb_single_save"/></td>
+            </tr>
+            <tr>
+                <td>给排水</td>
+                <td><input type="text" id="ys_jps_dwbj" name="ys_jps_dwbj" jb_hj="dwbj" jb_field="jb_single_save"/></td>
+                <td><input type="text" id="ys_jps_customer_vo" name="ys_jps_customer_vo" jb_hj="customer_vo" jb_field="jb_multi_save"/></td>
+                <td><input type="text" id="ys_jps_nkje" name="ys_jps_nkje" jb_hj="nkje" jb_field="jb_single_save"/></td>
+                <td><input type="text" id="ys_jps_kgmll" name="ys_jps_kgmll" jb_kgmll="jps" readonly="true"/></td>
+                <td><input type="text" id="ys_jps_sjcb" name="ys_jps_sjcb" jb_hj="sjcb" jb_field="jb_single_save"/></td>
+                <td><input type="text" id="ys_jps_fb_vo" name="ys_jps_fb_vo" jb_hj="fb_vo" jb_field="jb_multi_save"/></td>
+                <td><input type="text" id="ys_jps_sjmll" name="ys_jps_sjmll" jb_sjmll="jps" readonly="true"/></td>
+                <td><input type="text" id="ys_jps_sm" name="ys_jps_sm" jb_field="jb_single_save"/></td>
+            </tr>
+            <tr>
+                <td>IT</td>
+                <td><input type="text" id="ys_it_dwbj" name="ys_it_dwbj" jb_hj="dwbj" jb_field="jb_single_save"/></td>
+                <td><input type="text" id="ys_it_customer_vo" name="ys_it_customer_vo" jb_hj="customer_vo" jb_field="jb_multi_save"/></td>
+                <td><input type="text" id="ys_it_nkje" name="ys_it_nkje" jb_hj="nkje" jb_field="jb_single_save"/></td>
+                <td><input type="text" id="ys_it_kgmll" name="ys_it_kgmll" jb_kgmll="it" readonly="true"/></td>
+                <td><input type="text" id="ys_it_sjcb" name="ys_it_sjcb" jb_hj="sjcb" jb_field="jb_single_save"/></td>
+                <td><input type="text" id="ys_it_fb_vo" name="ys_it_fb_vo"  jb_hj="fb_vo" jb_field="jb_multi_save"/></td>
+                <td><input type="text" id="ys_it_sjmll" name="ys_it_sjmll" jb_sjmll="it" readonly="true"/></td>
+                <td><input type="text" id="ys_it_sm" name="ys_it_sm" jb_field="jb_single_save"/></td>
+            </tr>
+            <tr>
+                <td>SEC</td>
+                <td><input type="text" id="ys_sec_dwbj" name="ys_sec_dwbj" jb_hj="dwbj" jb_field="jb_single_save"/></td>
+                <td><input type="text" id="ys_sec_customer_vo" name="ys_sec_customer_vo" jb_hj="customer_vo" jb_field="jb_multi_save"/></td>
+                <td><input type="text" id="ys_sec_nkje" name="ys_sec_nkje" jb_hj="nkje" jb_field="jb_single_save"/></td>
+                <td><input type="text" id="ys_sec_kgmll" name="ys_sec_kgmll" jb_kgmll="sec" readonly="true"/></td>
+                <td><input type="text" id="ys_sec_sjcb" name="ys_sec_sjcb" jb_hj="sjcb" jb_field="jb_single_save"/></td>
+                <td><input type="text" id="ys_sec_fb_vo" name="ys_sec_fb_vo" jb_hj="fb_vo" jb_field="jb_multi_save"/></td>
+                <td><input type="text" id="ys_sec_sjmll" name="ys_sec_sjmll" jb_sjmll="sec" readonly="true"/></td>
+                <td><input type="text" id="ys_sec_sm" name="ys_sec_sm" jb_field="jb_single_save"/></td>
+            </tr>
+            <tr>
+                <td>AV</td>
+                <td><input type="text" id="ys_av_dwbj" name="ys_av_dwbj" jb_hj="dwbj" jb_field="jb_single_save"/></td>
+                <td><input type="text" id="ys_av_customer_vo" name="ys_av_customer_vo" jb_hj="customer_vo"  jb_field="jb_multi_save"/></td>
+                <td><input type="text" id="ys_av_nkje" name="ys_av_nkje" jb_hj="nkje" jb_field="jb_single_save"/></td>
+                <td><input type="text" id="ys_av_kgmll" name="ys_av_kgmll" jb_kgmll="av" readonly="true"/></td>
+                <td><input type="text" id="ys_av_sjcb" name="ys_av_sjcb" jb_hj="sjcb" jb_field="jb_single_save"/></td>
+                <td><input type="text" id="ys_av_fb_vo" name="ys_av_fb_vo" jb_hj="fb_vo" jb_field="jb_multi_save"/></td>
+                <td><input type="text" id="ys_av_sjmll" name="ys_av_sjmll" jb_sjmll="av" readonly="true"/></td>
+                <td><input type="text" id="ys_av_sm" name="ys_av_sm" jb_field="jb_single_save"/></td>
+            </tr>
+            <tr>
+                <td colspan="10">&nbsp;</td>
+            </tr>
+            <tr>
+                <td><h3>小计：</h3></td>
+                <td><input type="text" id="ys_hj_dwbj" name="ys_hj_dwbj" readonly="true"/></td>
+                <td><input type="text" id="ys_hj_customer_vo" name="ys_hj_customer_vo" readonly="true"/></td>
+                <td><input type="text" id="ys_hj_nkje" name="ys_hj_nkje" readonly="true"/></td>
+                <td><input type="text" id="ys_hj_kgmll" name="ys_hj_kgmll" readonly="true"/></td>
+                <td><input type="text" id="ys_hj_sjcb" name="ys_hj_sjcb" readonly="true"/></td>
+                <td><input type="text" id="ys_hj_fb_vo" name="ys_hj_fb_vo"  readonly="true"/></td>
+                <td><input type="text" id="ys_hj_sjmll" name="ys_hj_sjmll" readonly="true"/></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td colspan="10">&nbsp;</td>
+            </tr>
+            <tr>
+                <td rowspan=6>采购：</td>
+                <td>装修材料采购</td>
+                <td rowspan=4><input type="text" id="ys_cg_all_dwbj" name="ys_cg_all_dwbj" jb_single_hj="dwbj" jb_field="jb_single_save"/></td>
+                <td rowspan=4><input type="text" id="ys_cg_customer_vo" name="ys_cg_customer_vo" jb_single_hj="customer_vo" jb_field="jb_multi_save"/></td>
+                <td rowspan=4><input type="text" id="ys_cg_all_nkje" name="ys_cg_all_nkje" jb_single_hj="nkje" jb_field="jb_single_save"/></td>
+                <td rowspan=4><input type="text" id="ys_cg_all_kgmll" name="ys_cg_all_kgmll" jb_single_kgmll="cg_all" readonly="true"/></td>
+                <td><input type="text" id="cg_zxcg_sjcb" name="cg_zxcg_sjcb" jb_hj="cg_sjcb" jb_field="jb_multi_cg_save"/></td>
+                <td><input type="text" id="cg_zxcg_vo" name="cg_zxcg_vo" jb_hj="cg_vo" jb_field="jb_multi_cg_save"/></td>
+                <td rowspan=4><input type="text" id="cg_cg_all_sjmll" name="cg_cg_all_sjmll" readonly="true"/></td>
+                <td><input type="text" id="cg_zxclcg_sm" name="cg_zxclcg_sm" jb_field="jb_single_save"/></td>
+            </tr>
+            <tr>
+                <td>机电设备采购</td>
+                <td><input type="text" id="cg_jdcg_sjcb" name="cg_jdcg_sjcb" jb_hj="cg_sjcb" jb_field="jb_multi_cg_save"/></td>
+                <td><input type="text" id="cg_jdcg_vo" name="cg_jdcg_vo" jb_hj="cg_vo" jb_field="jb_multi_cg_save"/></td>
+
+                <td><input type="text" id="cg_jdsbcg_sm" name="cg_jdsbcg_sm" jb_field="jb_single_save"/></td>
+            </tr>
+            <tr>
+                <td>工厂库存及零星材料采购总金额</td>
+                <td><input type="text" id="cg_gckc_sjcb" name="cg_gckc_sjcb" jb_hj="cg_sjcb" jb_field="jb_single_save"/></td>
+                <td><input type="text" id="cg_gckc_sjcb_vo" name="cg_gckc_sjcb_vo" jb_hj="cg_vo" jb_field="jb_single_save"/></td>
+
+                <td><input type="text" id="cg_gckc_sm" name="cg_gckc_sm" jb_field="jb_single_save"/></td>
+            </tr>
+            <tr>
+                <td>工厂人工费</td>
+                <td><input type="text" id="cg_gcrgf_sjcb" name="cg_gcrgf_sjcb" jb_hj="cg_sjcb" jb_field="jb_single_save"/></td>
+                <td><input type="text" id="cg_gcrgf_sjcb_vo" name="cg_gcrgf_sjcb_vo" jb_hj="cg_vo" jb_field="jb_single_save"/></td>
+
+                <td><input type="text" id="cg_gcrgf_sm" name="cg_gcrgf_sm" jb_field="jb_single_save"/></td>
+            </tr>
+            <tr>
+                <td colspan="10">&nbsp;</td>
+            </tr>
+            <tr>
+                <td><h3>小计：</h3></td>
+                <td><input type="text" id="ys_hj_cg_dwbj" name="ys_hj_cg_dwbj" readonly="true"/></td></td>
+                <td><input type="text" id="ys_hj_cg_customer_vo" name="ys_hj_cg_customer_vo" readonly="true"/></td>
+                <td><input type="text" id="ys_hj_cg_nkje" name="ys_hj_cg_nkje" readonly="true"/></td>
+                <td><input type="text" id="ys_hj_cg_kgmll" name="ys_hj_cg_kgmll" readonly="true"/></td>
+                <td><input type="text" id="cg_hj_cg_sjcb" name="cg_hj_cg_sjcb" readonly="true"/></td>
+                <td><input type="text" id="cg_hj_cg_vo" name="cg_hj_cg_vo" readonly="true"/></td>
+                <td><input type="text" id="cg_hj_cg_sjmll" name="cg_hj_cg_sjmll" readonly="true"/></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>前期：</td>
+                <td>前期费用</td>
+                <td><input type="text" id="ys_qq_dwbj" name="ys_qq_dwbj" jb_qq_hj="dwbj" jb_field="jb_single_save"/></td>
+                <td><input type="text" id="ys_qq_customer_vo" name="ys_qq_customer_vo" jb_qq_hj="customer_vo" jb_field="jb_single_save"/></td>
+                <td><input type="text" id="ys_qq_nkje" name="ys_qq_nkje"  jb_qq_hj="nkje" jb_field="jb_single_save"/></td>
+                <td><input type="text" id="ys_qq_kgmll" name="ys_qq_kgmll" jb_qq_kgmll="qq" readonly="true"/></td>
+                <td><input type="text" id="ys_qq_sjcb" name="ys_qq_sjcb" jb_qq_hj="sjcb" jb_field="jb_multi_cg_save"/></td>
+                <td><input type="text" id="ys_qq_vo" name="ys_qq_vo" jb_qq_hj="qq_vo" jb_field="jb_multi_cg_save"/></td>
+                <td><input type="text" id="ys_qq_sjmll" name="ys_qq_sjmll" jb_qq_sjmll="qq" readonly="true"/></td>
+                <td><input type="text" id="ys_qq_sm" name="ys_qq_sm" jb_field="jb_single_save"/></td>
+            </tr>
+            <tr>
+                <td>直接人工成本：</td>
+                <td></td>
+                <td><input type="text" id="ys_rg_dwbj" name="ys_rg_dwbj" jb_rg_hj="dwbj" jb_field="jb_single_save"/></td>
+                <td></td>
+                <td><input type="text" id="ys_rg_nkje" name="ys_rg_nkje" jb_rg_hj="nkje" jb_field="jb_single_save"/></td>
+                <td><input type="text" id="ys_rg_kgmll" name="ys_rg_kgmll" jb_rg_kgmll="rg" readonly="true"/></td>
+                <td><input type="text" id="ys_rg_sjcb" name="ys_rg_sjcb" value="{$cur_project_zjrgcb}" jb_rg_hj="sjcb" readonly="true"/></td>
+                <td></td>
+                <td><input type="text" id="ys_rg_sjmll" name="ys_rg_sjmll" jb_rg_sjmll="rg" readonly="true"/></td>
+                <td><input type="text" id="ys_rg_sm" name="ys_rg_sm" jb_field="jb_single_save"/></td>
+            </tr>
+            <tr>
+                <td>其它：</td>
+                <td></td>
+                <td><input type="text" id="ys_qt_dwbj" name="ys_qt_dwbj" jb_qt_hj="dwbj" jb_field="jb_single_save"/></td>
+                <td><input type="text" id="ys_qt_customer_vo" name="ys_qt_customer_vo" jb_qq_hj="customer_vo" jb_field="jb_single_save"/></td>
+                <td><input type="text" id="ys_qt_nkje" name="ys_qt_nkje"  jb_qt_hj="nkje" jb_field="jb_single_save"/></td>
+                <td><input type="text" id="ys_qt_kgmll" name="ys_qt_kgmll" jb_qt_kgmll="qt" readonly="true"/></td>
+                <td><input type="text" id="ys_qt_sjcb" name="ys_qt_sjcb" jb_qt_hj="sjcb" jb_field="jb_single_save"/></td>
+                <td><input type="text" id="ys_qt_vo" name="ys_qt_vo" jb_qt_hj="qt_vo" jb_field="jb_single_save"/></td>
+                <td><input type="text" id="ys_qt_sjmll" name="ys_qt_sjmll" jb_qt_sjmll="qt" readonly="true"/></td>
+                <td><input type="text" id="ys_qt_sm" name="ys_qt_sm" jb_field="jb_single_save"/></td>
+            </tr>
+            <tr>
+                <td colspan="10">&nbsp;</td>
+            </tr>
+            <tr>
+                <td><h3>总计：</h3></td>
+                <td></td>
+                <td>
+                    <input type="text" id="zj_dwbj" name="zj_dwbj" readonly="true"/>
+                    <br>
+                    平衡值：<span id="span_zj_dwbj_phz"></span>
+                    <br>
+                    合同金额：{$ys_hetong_amt}
+                </td>
+                <td><input type="text" id="zj_customer_vo" name="zj_customer_vo" readonly="true"/></td>
+                <td><input type="text" id="zj_nkje" name="zj_nkje" readonly="true"/></td>
+                <td><input type="text" id="zj_kgmll" name="zj_kgmll" readonly="true"/></td>
+                <td><input type="text" id="zj_sjcb" name="zj_sjcb" readonly="true"/></td>
+                <td><input type="text" id="zj_vo" name="zj_vo" readonly="true"/></td>
+                <td><input type="text" id="zj_sjmll" name="zj_sjmll" readonly="true"/></td>
+                <td></td>
+            </tr>
+        </table>
+        <br>
+        <div>
+            <div id="cbgl_1_chartContainer">FusionCharts XT will load here!</div>
+        </div>
+        <br>
+        <div>
+            <div id="cbgl_2_chartContainer">FusionCharts XT will load here!</div>
+        </div>
+    </div>
+</div>

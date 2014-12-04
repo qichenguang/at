@@ -1,0 +1,281 @@
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#openAllPanes").button();
+        $("#closeAllPanes").button();
+        $("#themeMenu").menu({
+            select: function( event, ui ) {
+                var text = ui.item.context.innerText;
+                if(-1 == text.indexOf('背景')){
+                    var requestData = {theme: text};
+                    $.get('/index.php/Home/AllInOne/ajaxChengeTheme', requestData, function(data) {
+                        if(false == data.state){
+                            jAlert(data.msg);
+                        }else{
+                            jAlert(data.msg);
+                        }
+                    }).fail(function(jqXHR) {
+                                jAlert("fail:" + jqXHR.status + jqXHR.responseText);
+                            });
+                }
+            }
+        });
+        $("#changeTheme").button().click(function(event){
+            var requestData = {theme: $("#currentTheme").val()};
+            //console.log(requestData);
+            $.get('/index.php/Home/AllInOne/ajaxChengeTheme', requestData, function(data) {
+                if(false == data.state){
+                    jAlert(data.msg);
+                }else{
+                    jAlert(data.msg);
+                }
+            }).fail(function(jqXHR) {
+                        jAlert("fail:" + jqXHR.status + jqXHR.responseText);
+                    });
+        });
+        //
+        //
+        var myLayout = $('body').layout({ applyDemoStyles: true });
+        myLayout
+                // add MULTIPLE events to the 'Open All Panes' button in the Center pane dynamically...
+                .bindButton('#openAllPanes', 'open', 'north')
+                .bindButton('#openAllPanes', 'open', 'south')
+                .bindButton('#openAllPanes', 'open', 'west')
+                .bindButton('#openAllPanes', 'open', 'east')
+                // add MULTIPLE events to the 'Close All Panes' button in the Center pane dynamically...
+                .bindButton('#closeAllPanes', 'close', 'north')
+                .bindButton('#closeAllPanes', 'close', 'south')
+                .bindButton('#closeAllPanes', 'close', 'west')
+                .bindButton('#closeAllPanes', 'close', 'east');
+
+
+        var tabTemplate = "<li><a href='#{href}'>#{label}</a> <span class='ui-icon ui-icon-close' role='presentation' title='Close Tab'>Close Tab</span></li>";
+        var tabCounter = 2;
+        var maintab = $( "#tabs" ).tabs();
+        function addTab(newTabObj,tabId,tabTitle,desturl,tabContent) {
+            var id = "tabs-" + tabCounter;
+            if(tabId != ""){
+                id = "tabs-" + tabId;
+            }
+            if(desturl != ""){
+                id = desturl;
+            }
+            var label = tabTitle;
+            var li = "";
+            if(desturl != ""){
+                li = $( tabTemplate.replace( /#\{href\}/g, desturl ).replace( /#\{label\}/g, label ) );
+            }else{
+                li = $( tabTemplate.replace( /#\{href\}/g, "#" + id ).replace( /#\{label\}/g, label ) );
+            }
+
+            var tabContentHtml = tabContent;
+            newTabObj.find( ".ui-tabs-nav" ).append( li );
+            if(desturl == ""){
+                newTabObj.append( "<div id='" + id + "'><p>" + tabContentHtml + "</p></div>" );
+            }
+            newTabObj.tabs( "refresh" );
+            tabCounter++;
+        }
+        // 关闭图标：当点击时移除标签页
+        maintab.on( "click", "span.ui-icon-close", function() {
+            var panelId = $( this ).closest( "li" ).remove().attr( "aria-controls" );
+            $( "#" + panelId ).remove();
+            maintab.tabs( "refresh" );
+        });
+
+        if($("#west_usermng").length >= 1){
+             $("#west_usermng").button().click(function(event){
+                 var tab = $('#tabs li:contains("用户管理")');
+                 var curIndex = tab.index();
+                 if(tab.html() != null ) {
+                    maintab.tabs('option', 'active',curIndex);
+                    maintab.tabs( "refresh" );
+                 }
+                 else {
+                     addTab(maintab,"","用户管理","/index.php/Home/User/usermng","");
+                     //
+                     var tab = $('#tabs li:contains("用户管理")');
+                     var curIndex = tab.index();
+                     maintab.tabs('option', 'active', curIndex);
+                     maintab.tabs( "refresh" );
+                 }
+             });
+         }
+        //west_account_mng
+        if($("#west_account_mng").length >= 1){
+            $("#west_account_mng").button().click(function(event){
+                var tab = $('#tabs li:contains("账号管理")');
+                var curIndex = tab.index();
+                if(tab.html() != null ) {
+                    maintab.tabs('option', 'active',curIndex);
+                    maintab.tabs( "refresh" );
+                }
+                else {
+                    addTab(maintab,"","账号管理","/index.php/Home/Account/accountmng","");
+                    //
+                    var tab = $('#tabs li:contains("账号管理")');
+                    var curIndex = tab.index();
+                    maintab.tabs('option', 'active', curIndex);
+                    maintab.tabs( "refresh" );
+                }
+            });
+        }
+        //west_policy_mng
+        if($("#west_policy_mng").length >= 1){
+            $("#west_policy_mng").button().click(function(event){
+                var tab = $('#tabs li:contains("策略管理")');
+                var curIndex = tab.index();
+                if(tab.html() != null ) {
+                    maintab.tabs('option', 'active',curIndex);
+                    maintab.tabs( "refresh" );
+                }
+                else {
+                    addTab(maintab,"","策略管理","/index.php/Home/Policy/policymng","");
+                    //
+                    var tab = $('#tabs li:contains("策略管理")');
+                    var curIndex = tab.index();
+                    maintab.tabs('option', 'active', curIndex);
+                    maintab.tabs( "refresh" );
+                }
+            });
+        }
+        //west_createproject
+        if($("#west_project_mng").length >= 1){
+            $("#west_project_mng").button().click(function(event){
+                var tab = $('#tabs li:contains("项目管理")');
+                var curIndex = tab.index();
+                if(tab.html() != null ) {
+                    maintab.tabs('option', 'active',curIndex);
+                    maintab.tabs( "refresh" );
+                }
+                else {
+                    addTab(maintab,"","项目管理","/index.php/Home/Project/projectmng","");
+                    //
+                    var tab = $('#tabs li:contains("项目管理")');
+                    var curIndex = tab.index();
+                    maintab.tabs('option', 'active', curIndex);
+                    maintab.tabs( "refresh" );
+                }
+            });
+        }
+
+        //west_search project
+        if($("#west_project_search").length >= 1){
+            $("#west_project_search").button().click(function(event){
+                var tab = $('#tabs li:contains("项目查询")');
+                var curIndex = tab.index();
+                if(tab.html() != null ) {
+                    maintab.tabs('option', 'active',curIndex);
+                    maintab.tabs( "refresh" );
+                }
+                else {
+                    addTab(maintab,"","项目查询","/index.php/Home/Project/projectsearch","");
+                    //
+                    var tab = $('#tabs li:contains("项目查询")');
+                    var curIndex = tab.index();
+                    maintab.tabs('option', 'active', curIndex);
+                    maintab.tabs( "refresh" );
+                }
+            });
+        }
+        //west_search alert
+        if($("#west_alert_search").length >= 1){
+            $("#west_alert_search").button().click(function(event){
+                var tab = $('#tabs li:contains("报警查询")');
+                var curIndex = tab.index();
+                if(tab.html() != null ) {
+                    maintab.tabs('option', 'active',curIndex);
+                    maintab.tabs( "refresh" );
+                }
+                else {
+                    addTab(maintab,"","报警查询","/index.php/Home/Alert/alertsearch","");
+                    //
+                    var tab = $('#tabs li:contains("报警查询")');
+                    var curIndex = tab.index();
+                    maintab.tabs('option', 'active', curIndex);
+                    maintab.tabs( "refresh" );
+                }
+            });
+        }
+        if($("#west_userlogout").length >= 1){
+            $("#west_userlogout").button().click(function(event){
+                window.location.replace("/index.php");
+            });
+        }
+    });
+</script>
+<style>
+    .ui-menu:after {
+        content: ".";
+        display: block;
+        clear: both;
+        visibility: hidden;
+        line-height: 0;
+        height: 0;
+    }
+    .ui-menu .ui-menu-item {
+        display: inline-block;
+        float: left;
+        margin: 0;
+        padding: 0;
+        width: auto;
+    }
+</style>
+</head>
+<body>
+
+<div id="RightPane" class="ui-layout-center ui-helper-reset ui-widget-content">
+    <table>
+        <tr>
+            <td>
+                <button id="openAllPanes">打开其它面版</button>
+                &nbsp;
+                <button id="closeAllPanes">关闭其它面板</button>
+                &nbsp;
+            </td>
+            <td>
+<!--                <select name="currentTheme" id="currentTheme">
+                    <option value="redmond">redmond</option>
+                    <option value="swanky-purse">swanky-purse</option>
+                    <option value="smoothness">smoothness</option>
+                    <option value="start">start</option>
+                    <option value="le-frog">le-frog</option>
+                </select>
+                <button id="changeTheme">更换背景</button>-->
+            </td>
+            <td>
+                <!--通过CSS控制排成一行-->
+                <ul id="themeMenu">
+                    <li><a href="#">更换背景</a>
+                        <ul>
+                            <li><a href="#">redmond</a></li>
+                            <li><a href="#">swanky-purse</a></li>
+                            <li><a href="#">smoothness</a></li>
+                            <li><a href="#">start</a></li>
+                            <li><a href="#">le-frog</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </td>
+        </tr>
+    </table>
+    <div id="tabs" class="jqgtabs">
+        <ul>
+            <li><a href="#tabs-1">jqGrid 3.6</a></li>
+        </ul>
+        <div id="tabs-1" style="font-size:12px;"> Many Thanks to Mark Williams which do the most of the new things added in 3.6<br/>
+            <br/>
+            Enjoy
+        </div>
+    </div>
+</div>
+<div class="ui-layout-north"></div>
+<div class="ui-layout-south"></div>
+<div class="ui-layout-east">
+    <include file="east" />
+</div>
+<div class="ui-layout-west">
+    <include file="west" />
+</div>
+
+
+

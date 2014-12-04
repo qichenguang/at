@@ -1,0 +1,18 @@
+<script src="__PUBLIC__/js/user.js"></script>
+<div id="userAddMain">
+    <FORM id="userAddForm" method="post" action="__URL__/insert">
+        用户姓名：<em>*</em><INPUT type="text" id="user_name" name="user_name"><br/>
+        Email 作为登录用户名：<em>*</em><input type="text"  id="email" name="email"  /><br/>
+        登录密码：<em>*</em><input type="password"  id="password" name="password"  /><br/>
+        重复输入密码：<em>*</em><input type="password"  id="confirm_password" name="confirm_password"  /><br/>
+        部门：<em>*</em>
+        <select name="department" id="department">
+            <foreach name="department_array" item="vo" >
+                <option value="{$vo.id}">{$vo.name}</option>
+            </foreach>
+        </select>
+        <br/>
+        <INPUT type="submit" value="提交">
+    </FORM>
+</div>
+
