@@ -366,6 +366,12 @@ class AllInOneController extends Controller {
         }
         return array("total_num" => $total_num, "total_money" => $total_money);*/
     }
+    public function get_sj_total_sell_num_price($job_id){
+        $redis = $this->getRedisObj();
+        $all_sj_num = $redis->hashGet("jobs:sell:result:all_sj_num",$job_id,1);
+        $all_sj_price = $redis->hashGet("jobs:sell:result:all_sj_price",$job_id,1);
+        return array("total_num" => $all_sj_num, "total_money" => ($all_sj_price));
+    }
     public function ajaxJobBuySave(){
         $Data = M('project_jobs'); // 实例化Data数据模型
         //
@@ -514,8 +520,9 @@ class AllInOneController extends Controller {
         if(!empty($list)){
             foreach($list as $item_str){
                 $item = json_decode($item_str,true);
-                $responce["rows"][$i]['id']=$item['job_item_id'];
-                $responce["rows"][$i]['cell'] = array($item['job_item_id'],
+                trace($item,"item");
+                $responce["rows"][$i]['id']=$item['job_msg_id'];
+                $responce["rows"][$i]['cell'] = array($item['job_msg_id'],
                     $item['account'],
                     $item['yj_buy_num'],
                     $item['sj_buy_num'],
@@ -791,7 +798,6 @@ class AllInOneController extends Controller {
         if($sidx == ""){
             $sidx = 'id';
         }
-
         //查询标志
         $pro_id = I('pro_id');
         //
@@ -838,7 +844,7 @@ class AllInOneController extends Controller {
             foreach($list as $item){
                 //实时计算实际成交金额和数量
                 $job_id = $item["id"];
-                //$calc_array = $this->get_sj_total_buy_num_price($job_id);
+                $calc_array = $this->get_sj_total_sell_num_price($job_id);
                 //
                 $responce["rows"][$i]['id']=$item["id"];
                 $responce["rows"][$i]['cell'] = array($item['id'],
@@ -848,9 +854,8 @@ class AllInOneController extends Controller {
                     $item['cur_can_sell_num'],
                     $item['percent'],
                     intval(floatval($item['percent']) * floatval($item['cur_can_sell_num']) /100),
-                    //floatval($calc_array['total_money']),
-                    //intval($calc_array['total_num']),
-                    0,0,
+                    floatval($calc_array['total_money']),
+                    intval($calc_array['total_num']),
                     $status_array[$item['status']],
                     $item['job_ks_time'],
                     $item['job_js_time'],
