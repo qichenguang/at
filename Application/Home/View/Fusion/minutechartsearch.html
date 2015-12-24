@@ -1,0 +1,69 @@
+<!--<script src="__PUBLIC__/js/minutechartsearch.js"></script>-->
+<script type="text/javascript">
+    $(document).ready(function() {
+        get_minute_chart_need_data();
+        setInterval(get_minute_chart_need_data, 60000);
+        //jqgrid end----------------------------------------------------------------------------------------------------
+        function get_minute_chart_need_data(){
+            var ret = $.post("/index.php/Home/Fusion/ajaxGetMinuteChartData",{}, function(response){
+                var minute_Chart = new FusionCharts( "__PUBLIC__/js/Lib/FusionCharts/Charts/MSLine.swf",// MSLine.swf Line.swf,MSColumn2D.swf  MSBar2D.swf
+                        "minute_Chart",  $(window).width()-50 ,  $(window).height()-50 , "0", "1" );
+                minute_Chart.setJSONData({
+                    "chart":
+                    {
+                        "caption": "统计",
+                        "showlabels": "1",
+                        "showvalues": "0",
+                        "decimals": "0",
+                        "numberprefix": "",
+                        "placevaluesinside": "1",
+                        /*                            "rotatevalues": "1",*/
+                        "basefont":"Arial",
+                        "basefontsize":"15",
+                        "basefontcolor":"000000"
+                        /*                            ,
+                         "xAxisName" : "月份",
+                         "yAxisName" : "金额"*/
+                    },
+                    "categories":response.categories,
+                    "dataset" :response.dataset,
+                    "trendlines":{
+                        "line":[{
+                            "startvalue":"1500",
+                            "color":"91C728",
+                            "displayvalue":"1500",
+                            "showontop":"1"
+                        }
+                        ]
+                    },
+                    "styles": {
+                        "definition": [
+                            {
+                                "name": "CanvasAnim",
+                                "type": "animation",
+                                "param": "_xScale",
+                                "start": "0",
+                                "duration": "1"
+                            }
+                        ],
+                        "application": [
+                            {
+                                "toobject": "Canvas",
+                                "styles": "CanvasAnim"
+                            }
+                        ]
+                    }
+                });
+                minute_Chart.render("minute_chartContainer");
+                //-------------------------------------------------------------------------------------------------------------
+            });
+            return ret;
+        }
+    });
+</script>
+<div>
+    <div id="minute_chartContainer">FusionCharts XT will load here!</div>
+</div>
+
+
+

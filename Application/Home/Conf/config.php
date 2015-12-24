@@ -3,7 +3,7 @@ return array(
 	//'配置项'=>'配置值'
     'LAYOUT_ON'=>true,
     'LAYOUT_NAME'=>'layout',
-    'SHOW_PAGE_TRACE' =>false,
+    'SHOW_PAGE_TRACE' =>true,
     //'PAGE_TRACE_SAVE'=>true,
     // 添加数据库配置信息
     'DB_TYPE'   => 'mysql', // 数据库类型

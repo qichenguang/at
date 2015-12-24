@@ -3,6 +3,79 @@ namespace Home\Controller;
 use Think\Controller;
 class FusionController extends Controller {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //分钟图形
+    public function minutechartsearch(){
+        $this->display();
+    }
+    //Ajax获得分钟图形数据
+    public function ajaxGetMinuteChartData(){
+        $minute_file_dir = "E:/project/pychram/traderesp/base/output-csv/work/everyday/";
+        $date_str = date ("Y-m-d");
+        $file_name = $minute_file_dir . $date_str . "/minute.txt";
+        trace($file_name);
+        $fp = fopen($file_name,"r");
+        $minute_array = array();
+        $fast_num_array = array();
+        $slow_num_array = array();
+        while(!feof($fp)) {
+            $row = trim(fgets($fp));
+            if ($row != "") {
+                $info = explode(",", $row);
+                if(count($info) == 3){
+                    $minute_array[] = $info[0];
+                    $fast_num_array[] = $info[1];
+                    $slow_num_array[] = $info[2];
+                }
+
+            }
+        }
+        fclose( $fp );
+        //
+        //trace($minute_array,"minute");
+        //
+        $num = count($minute_array);
+        //
+        $categories = array();
+        $category = array();
+        for($i=0;$i<$num;$i++){
+            $tmp = array();
+            $tmp['label'] = $minute_array[$i];
+            $category[] = $tmp;
+        }
+        $categories['category'] = $category;
+        //
+        $dataset = array();
+        //
+        $fast_dataset = array();
+        $fast_dataset['seriesname'] = "快线";
+        $fast_data = array();
+        for($i=0;$i<$num;$i++){
+            $tmp = array();
+            $tmp['value'] = $fast_num_array[$i];
+            $fast_data[] = $tmp;
+        }
+        $fast_dataset['data'] = $fast_data;
+        $dataset[] = $fast_dataset;
+        //
+        $slow_dataset = array();
+        $slow_dataset['seriesname'] = "慢线";
+        $slow_data = array();
+        for($i=0;$i<$num;$i++){
+            $tmp = array();
+            $tmp['value'] = $slow_num_array[$i];
+            $slow_data[] = $tmp;
+        }
+        $slow_dataset['data'] = $slow_data;
+        $dataset[] = $slow_dataset;
+        //
+        //
+        $responce = array();
+        $responce['categories'] = $categories;
+        $responce['dataset'] = $dataset;
+        trace($responce);
+        $this->ajaxReturn($responce);
+    }
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     private function getProjectRecCbDetail($item){
         $r = array();
         //1.查询：fb cg customer_vo
