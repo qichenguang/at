@@ -8,6 +8,32 @@ class FusionController extends Controller {
         $this->display();
     }
     //Ajax获得分钟图形数据
+    public function get_last_day_macd_data(){
+        $fast_num=0;
+        $slow_num=0;
+        $file_name = "E:/project/pychram/traderesp/base/input-csv/end-is-today-ema12-ema26-macd/today_macd.txt";
+        if (file_exists($file_name)) {
+            $lines = file($file_name);
+            //trace($lines,"lines");
+            if ($lines != FALSE) {
+                $len = count($lines);
+                trace($len, "tail_len");
+                $tail_pos = $len - 1;
+                if ($len >= 0) {
+                    $tail_line = trim($lines[$tail_pos]);
+                    //trace($tail_line,"tail_line");
+                    if ($tail_line != "") {
+                        $info = explode(",", $tail_line);
+                        if (count($info) == 3) {
+                            $fast_num = $info[1];
+                            $slow_num = $info[2];
+                        }
+                    }
+                }
+            }
+        }
+        return array("fast_num" => $fast_num, "slow_num" => $slow_num);
+    }
     public function get_prev_day_macd_data($minute_path){
         $fast_num=0;
         $slow_num=0;
@@ -17,7 +43,7 @@ class FusionController extends Controller {
             trace($file_name);
             if (file_exists($file_name)) {
                 $lines = file($file_name);
-               //trace($lines,"lines");
+                //trace($lines,"lines");
                 if($lines != FALSE){
                     $len = count($lines);
                     trace($len,"tail_len");
@@ -48,8 +74,8 @@ class FusionController extends Controller {
         $file_name = $minute_file_dir . $date_str . "/minute.txt";
         trace($file_name);
         //
-        $init_nums = $this->get_prev_day_macd_data($minute_file_dir);
-        trace($init_nums,"get_prev_day_macd_data");
+        $init_nums = $this->get_last_day_macd_data();
+        trace($init_nums,"get_last_day_macd_data");
         //
         $fp = fopen($file_name,"r");
         $hour_array = array();
