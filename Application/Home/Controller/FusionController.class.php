@@ -8,25 +8,76 @@ class FusionController extends Controller {
         $this->display();
     }
     //Ajax获得分钟图形数据
+    public function get_prev_day_macd_data($minute_path){
+        $fast_num=0;
+        $slow_num=0;
+        for($i=1;$i<30;$i++){
+            $date_str = date("Y-m-d",strtotime("-" . $i . " day"));
+            $file_name = $minute_path . $date_str . "/minute.txt";
+            trace($file_name);
+            if (file_exists($file_name)) {
+                $lines = file($file_name);
+               //trace($lines,"lines");
+                if($lines != FALSE){
+                    $len = count($lines);
+                    trace($len,"tail_len");
+                    $tail_pos = $len - 1;
+                    if ($len >= 0) {
+                        $tail_line = trim($lines[$tail_pos]);
+                        //trace($tail_line,"tail_line");
+                        if ($tail_line != "") {
+                            $info = explode(",", $tail_line);
+                            if (count($info) == 3) {
+                                $it_time = explode(" ", $info[0]);
+                                $hour_min = explode(":", $it_time[1]);
+                                $minute_array[] = $hour_min[0] . ":" . $hour_min[1];
+                                $fast_num = $info[1];
+                                $slow_num = $info[2];
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return array("fast_num" => $fast_num, "slow_num" => $slow_num);
+    }
     public function ajaxGetMinuteChartData(){
         $minute_file_dir = "E:/project/pychram/traderesp/base/output-csv/work/everyday/";
         $date_str = date ("Y-m-d");
         $file_name = $minute_file_dir . $date_str . "/minute.txt";
         trace($file_name);
+        //
+        $init_nums = $this->get_prev_day_macd_data($minute_file_dir);
+        trace($init_nums,"get_prev_day_macd_data");
+        //
         $fp = fopen($file_name,"r");
+        $hour_array = array();
         $minute_array = array();
         $fast_num_array = array();
         $slow_num_array = array();
+        $fast_tooltext_array = array();
+        $slow_tooltext_array = array();
         while(!feof($fp)) {
             $row = trim(fgets($fp));
             if ($row != "") {
                 $info = explode(",", $row);
                 if(count($info) == 3){
-                    $minute_array[] = $info[0];
-                    $fast_num_array[] = $info[1];
-                    $slow_num_array[] = $info[2];
+                    $it_time = explode(" ", $info[0]);
+                    $hour_min = explode(":", $it_time[1]);
+                    $hour_array[] = $hour_min[0];
+                    $minute_array[] = $hour_min[1];
+                    //$fast_num_array[] = $info[1];
+                    //$slow_num_array[] = $info[2];
+                    //$fast_num_array[] = $info[1] - $init_nums["fast_num"];
+                    $fast_num_array[] = round(($info[1] / $init_nums["fast_num"])*100) - 100;
+                    $fast_tooltext_array[] = ($info[1] - $init_nums["fast_num"]) . "," . (round(($info[1] / $init_nums["fast_num"])*100)) . "%"  ;
+                    //$slow_num_array[] = ($info[2] - $init_nums["slow_num"]);
+                    $slow_num_array[] = round(($info[2] / $init_nums["slow_num"])*100) - 100;
+                    $slow_tooltext_array[] = ($info[2] - $init_nums["slow_num"]) . "," . (round(($info[2] / $init_nums["slow_num"])*100)) . "%"  ;
+                    //$fast_num_array[] = $info[1] - $init_nums["slow_num"];
+                    //$slow_num_array[] = $info[2] - $init_nums["slow_num"];
                 }
-
             }
         }
         fclose( $fp );
@@ -35,11 +86,67 @@ class FusionController extends Controller {
         //
         $num = count($minute_array);
         //
+        //gen vlinpos
+        $vtrendlines = array();
+        $vtrendline = array();
+        $last_hour = $hour_array[0];
+        $half_hour = false;
+        for($i=0;$i<$num;$i++){
+            if($last_hour != $hour_array[$i]) {
+                $last_hour = $hour_array[$i];
+                $half_hour = false;
+                //
+                $tmp = array();
+                $tmp["index"] = $i;
+                $tmp["displayalways"] = "1";
+                $tmp["displayvalue"] = $hour_array[$i] . ":00";
+                $tmp["dashed"] = "1";
+                $tmp["showontop"] = "0";
+                $tmp["color"] = "C0C0C0";
+                $tmp["thickness"] = "2";
+                /*                    "index": "30",
+                                                "displayalways": "1",
+                                                "displaywhencount": "20",
+                                                "displayvalue": "Dividend",
+                                                "dashed": "1",
+                                                "showontop": "0",
+                                                "color": "FF5904",
+                                                "thickness":"2",
+                                                "dashlen": "3",
+                                                "dashgap": "3"*/
+                $vtrendline[] = $tmp;
+            }
+            else if($half_hour == false && $minute_array[$i] > 30){//$last_hour == $hour_array[$i]
+                $half_hour = true;
+                //
+                $tmp = array();
+                $tmp["index"] = $i;
+                $tmp["displayalways"] = "1";
+                $tmp["displayvalue"] = $hour_array[$i] . ":30";
+                $tmp["dashed"] = "1";
+                $tmp["showontop"] = "0";
+                $tmp["color"] = "C0C0C0";
+                $tmp["thickness"] = "2";
+                /*                    "index": "30",
+                                                "displayalways": "1",
+                                                "displaywhencount": "20",
+                                                "displayvalue": "Dividend",
+                                                "dashed": "1",
+                                                "showontop": "0",
+                                                "color": "FF5904",
+                                                "thickness":"2",
+                                                "dashlen": "3",
+                                                "dashgap": "3"*/
+                $vtrendline[] = $tmp;
+            }
+        }
+        $vtrendlines['line'] = $vtrendline;
+        //
         $categories = array();
         $category = array();
         for($i=0;$i<$num;$i++){
             $tmp = array();
-            $tmp['label'] = $minute_array[$i];
+            $tmp['label'] = $hour_array[$i] . ":" . $minute_array[$i];
             $category[] = $tmp;
         }
         $categories['category'] = $category;
@@ -48,10 +155,12 @@ class FusionController extends Controller {
         //
         $fast_dataset = array();
         $fast_dataset['seriesname'] = "快线";
+        $fast_dataset['color'] = "FF0000";
         $fast_data = array();
         for($i=0;$i<$num;$i++){
             $tmp = array();
             $tmp['value'] = $fast_num_array[$i];
+            $tmp['tooltext'] = $fast_tooltext_array[$i];
             $fast_data[] = $tmp;
         }
         $fast_dataset['data'] = $fast_data;
@@ -63,16 +172,17 @@ class FusionController extends Controller {
         for($i=0;$i<$num;$i++){
             $tmp = array();
             $tmp['value'] = $slow_num_array[$i];
+            $tmp['tooltext'] = $slow_tooltext_array[$i];
             $slow_data[] = $tmp;
         }
         $slow_dataset['data'] = $slow_data;
         $dataset[] = $slow_dataset;
         //
-        //
         $responce = array();
         $responce['categories'] = $categories;
         $responce['dataset'] = $dataset;
-        trace($responce);
+        $responce['vtrendlines'] = $vtrendlines;
+        //trace($responce);
         $this->ajaxReturn($responce);
     }
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

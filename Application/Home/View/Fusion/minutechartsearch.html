@@ -6,7 +6,8 @@
         //jqgrid end----------------------------------------------------------------------------------------------------
         function get_minute_chart_need_data(){
             var ret = $.post("/index.php/Home/Fusion/ajaxGetMinuteChartData",{}, function(response){
-                var minute_Chart = new FusionCharts( "__PUBLIC__/js/Lib/FusionCharts/Charts/MSLine.swf",// MSLine.swf Line.swf,MSColumn2D.swf  MSBar2D.swf
+                console.log(response)
+                var minute_Chart = new FusionCharts( "__PUBLIC__/js/Lib/FusionCharts/Charts/ZoomLine.swf",// MSLine.swf Line.swf,MSColumn2D.swf  MSBar2D.swf
                         "minute_Chart",  $(window).width()-50 ,  $(window).height()-50 , "0", "1" );
                 minute_Chart.setJSONData({
                     "chart":
@@ -17,10 +18,15 @@
                         "decimals": "0",
                         "numberprefix": "",
                         "placevaluesinside": "1",
-                        /*                            "rotatevalues": "1",*/
+                        /*"formatnumberscale":"0",*/
+                        /*"formatnumber":"0",*/
+                        /*"formatnumberscale":"0",*/
+                        /*"rotatevalues": "1",*/
+
                         "basefont":"Arial",
                         "basefontsize":"15",
-                        "basefontcolor":"000000"
+                        "basefontcolor":"000000",
+                        "yaxisname":"百分比变化率 "
                         /*                            ,
                          "xAxisName" : "月份",
                          "yAxisName" : "金额"*/
@@ -29,13 +35,18 @@
                     "dataset" :response.dataset,
                     "trendlines":{
                         "line":[{
-                            "startvalue":"1500",
-                            "color":"91C728",
-                            "displayvalue":"1500",
-                            "showontop":"1"
+                            "startvalue":"0",
+                            "endValue":"0",
+                            "isTrendZone":"0",
+                            "color":"009933",
+                            "displayvalue":"0",
+                            "showontop":"1",
+                            "thickness":"2"
+
                         }
                         ]
                     },
+                    "vtrendlines": response.vtrendlines,
                     "styles": {
                         "definition": [
                             {
