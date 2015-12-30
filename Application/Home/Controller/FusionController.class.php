@@ -11,7 +11,7 @@ class FusionController extends Controller {
     public function get_last_day_macd_data(){
         $fast_num=0;
         $slow_num=0;
-        $file_name = "E:/project/pychram/traderesp/base/input-csv/end-is-today-ema12-ema26-macd/today_macd.txt";
+        $file_name = "E:/project/pychram/traderesp/base/input-csv/end-is-today-stock-ema12-ema26-macd/today_stock_macd.txt";
         if (file_exists($file_name)) {
             $lines = file($file_name);
             //trace($lines,"lines");
