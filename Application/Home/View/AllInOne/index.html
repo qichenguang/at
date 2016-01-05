@@ -38,9 +38,12 @@
         myLayout
                 // add MULTIPLE events to the 'Open All Panes' button in the Center pane dynamically...
                 .bindButton('#openAllPanes', 'open', 'north')
-                .bindButton('#openAllPanes', 'open', 'south')
+                //.bindButton('#openAllPanes', 'open', 'south')
                 .bindButton('#openAllPanes', 'open', 'west')
-                .bindButton('#openAllPanes', 'open', 'east')
+                //.bindButton('#openAllPanes', 'open', 'east')
+                //init 关闭 east,south 目前不需要
+                .bindButton('#openAllPanes', 'close', 'east')
+                .bindButton('#openAllPanes', 'close', 'south')
                 // add MULTIPLE events to the 'Close All Panes' button in the Center pane dynamically...
                 .bindButton('#closeAllPanes', 'close', 'north')
                 .bindButton('#closeAllPanes', 'close', 'south')
@@ -208,7 +211,25 @@
                 window.location.replace("/index.php/Home/Fusion/minutechartsearch");
             });
         }
-
+        //west_log_search
+        if($("#west_log_search").length >= 1){
+            $("#west_log_search").button().click(function(event){
+                var tab = $('#tabs li:contains("日志查询")');
+                var curIndex = tab.index();
+                if(tab.html() != null ) {
+                    maintab.tabs('option', 'active',curIndex);
+                    maintab.tabs( "refresh" );
+                }
+                else {
+                    addTab(maintab,"","日志查询","/index.php/Home/Log/logsearch","");
+                    //
+                    var tab = $('#tabs li:contains("日志查询")');
+                    var curIndex = tab.index();
+                    maintab.tabs('option', 'active', curIndex);
+                    maintab.tabs( "refresh" );
+                }
+            });
+        }
     });
 </script>
 <style>
@@ -277,10 +298,10 @@
     </div>
 </div>
 <div class="ui-layout-north"></div>
-<div class="ui-layout-south"></div>
+<!--<div class="ui-layout-south"></div>
 <div class="ui-layout-east">
     <include file="east" />
-</div>
+</div>-->
 <div class="ui-layout-west">
     <include file="west" />
 </div>

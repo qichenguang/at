@@ -190,6 +190,13 @@ function USER_FUN_GET_PROJECT_STATUS_NAME(){
     return $st;
 }
 
+function USER_FUN_GET_LOG_TYPE_NAME(){
+    $st = array(
+        '101' => "HTTP",
+    );
+    return $st;
+}
+
 function USER_FUN_GET_QS_NAME(){
     $vo = array(
         'zx'=> "中信证券",
