@@ -16,9 +16,23 @@ CREATE DATABASE /*!32312 IF NOT EXISTS*/`at` /*!40100 DEFAULT CHARACTER SET utf8
 
 USE `at`;
 
-/*Table structure for table `at_alert` */
+/*Table structure for table `at_log` */
+
+DROP TABLE IF EXISTS `at_log`;
+
+CREATE TABLE `at_log` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `lx` tinyint(4) DEFAULT NULL COMMENT '日志信息类型',
+  `log_msg` char(150) DEFAULT NULL COMMENT '日志信息内容',
+  `log_time` datetime DEFAULT NULL COMMENT '生成日志日期',
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=30 DEFAULT CHARSET=utf8 CHECKSUM=1 DELAY_KEY_WRITE=1 ROW_FORMAT=DYNAMIC COMMENT='日志表';
+
+/*Data for the table `at_log` */
 
 DROP TABLE IF EXISTS `at_alert`;
+
+/*Table structure for table `at_alert` */
 
 CREATE TABLE `at_alert` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
