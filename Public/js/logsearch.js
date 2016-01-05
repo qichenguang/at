@@ -1,13 +1,6 @@
 $(document).ready(function(){
     //jqGrid setting 开始.//////////////////////////////////////////////////////////////////////////////////////////////
 
-    function pro_id_format( cellvalue, options, rowObject ){
-        return '<a href="/index.php/Home/AllInOne/allmodules/pro_id/' + cellvalue + '"  target="_blank" >' + cellvalue + '</a>';
-    }
-    function pro_id_unformat(cellvalue, options, cell){
-        return $('a', cell).text();
-    }
-
     function getColModel_Id(){
         return {name:'id',index:'id',
             width:2,align:"right",
