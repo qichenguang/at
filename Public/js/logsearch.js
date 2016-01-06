@@ -54,7 +54,7 @@ $(document).ready(function(){
 					editoptions:{
 						value:{
 							'0':'全部',
-							'101':'HTTP'
+							'101':'H_I_S'
 						},
 						defaultValue:"0"
 					},

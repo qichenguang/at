@@ -192,7 +192,7 @@ function USER_FUN_GET_PROJECT_STATUS_NAME(){
 
 function USER_FUN_GET_LOG_TYPE_NAME(){
     $st = array(
-        '101' => "HTTP",
+        '101' => "H_I_S",
     );
     return $st;
 }
