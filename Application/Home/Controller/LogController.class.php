@@ -18,6 +18,7 @@ class LogController extends Controller {
         }
         //手动查询标志
         $searchOn = I('_search');
+        $cond = array();
         //多条件查询
         if('true' == $searchOn) {
             $sarr = I('param.');
@@ -66,5 +67,42 @@ class LogController extends Controller {
             $i++;
         }
         $this->ajaxReturn($responce);
+    }
+    //
+    public function ajaxLogSearchSave(){
+        $Data = M('log'); // 实例化Data数据模型
+
+        $oper = I('oper');
+        $id = I('id');
+
+        switch ($oper) {
+            case "add"://
+                break;
+            case "edit"://
+                break;
+            case "del":
+                if(empty($id)){
+                    $this->ajaxReturn(array('state' => false, 'msg' => "字段不能为空", 'id' => $id));
+                }
+                $condition['id'] = $id;
+                $result  = $Data->where($condition)->delete();
+                if(false === $result){
+                    $this->ajaxReturn(array('state' => false, 'msg' => "存盘失败,请检查数据库连接设置", 'id' => $id));
+                }elseif(0 == $result){
+                    $this->ajaxReturn(array('state' => false, 'msg' => "信息不允许修改", 'id' => $id));
+                }else{
+                    $this->ajaxReturn(array('state' => true, 'msg' => "存盘成功", 'id' => $id));
+                }
+                break;
+            default:
+                break;
+        }
+    }
+
+    public function _before_ajaxLogSearchSave(){
+        $department = $_SESSION['department'];
+        if("gl" != $department){
+            $this->error("没有权限!");
+        }
     }
 }
