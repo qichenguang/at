@@ -35,7 +35,7 @@ $(document).ready(function(){
         colModel:[
             getColModel_Id()
             ,
-            getColModel_Comm_text("log_time",2,"生成日期",3)
+            getColModel_Comm_text("log_time",2,"生成日期",5)
             ,
             {
                 name: "lx",

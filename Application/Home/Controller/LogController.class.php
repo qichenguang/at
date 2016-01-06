@@ -59,7 +59,7 @@ class LogController extends Controller {
         foreach($list as $item){
             $responce["rows"][$i]['id']=$item["id"];
             $responce["rows"][$i]['cell'] = array($item['id'],
-                $item['log_time'] == "" ? "" : date("Y-m-d",strtotime($item['log_time'])),
+                $item['log_time'] == "" ? "" : date("Y-m-d H:i",strtotime($item['log_time'])),
                 $st[$item['lx']],
                 $item['log_msg'],
                 );
