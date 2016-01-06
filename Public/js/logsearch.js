@@ -155,7 +155,7 @@ $(document).ready(function(){
         if($(domPageId + ":contains(Toggle)").length < 1){
             jQuery(domTableId).jqGrid('navButtonAdd',domPageId,{caption:"Toggle",title:"Toggle Search Toolbar", buttonicon :'ui-icon-pin-s',
                 onClickButton:function(){
-                    $accountcommgridobj[0].toggleToolbar();
+                    $logcommgridobj[0].toggleToolbar();
                 }
             });
         }
