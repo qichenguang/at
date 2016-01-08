@@ -69,6 +69,61 @@ class LogController extends Controller {
         $this->ajaxReturn($responce);
     }
     //
+    public function ajaxLogSearchDetail(){
+        $pagenum = I('page',1); // get the requested page
+        $limitnum = I('rows',1); // get how many rows we want to have into the grid
+        $sidx = I('sidx','id'); // get index row - i.e. user click to sort
+        $sord = I('sord','desc'); // get the direction
+        if($sidx == ""){
+            $sidx = 'id';
+        }
+        //手动查询标志
+        $searchOn = I('_search');
+        $cond = array();
+        //多条件查询
+        $searchOn = true;
+        if('true' == $searchOn) {
+            $sarr = I('param.');
+            foreach( $sarr as $k=>$v) {
+                switch ($k) {
+                    case 'id':
+                        $cond[$k] = $v;
+                        break;
+                }
+            }
+        }
+        //trace($cond,"cond");
+        //
+        $sidx = "at_log." . $sidx;
+        //
+        $LOG = M('log'); // 实例化对象
+        $count = $LOG->where($cond)->order(array($sidx => $sord))->count();// 查询满足要求的总记录数
+        $list =  $LOG->where($cond)->order(array($sidx => $sord))->page($pagenum,$limitnum)->select();
+        $total_pages = 0;
+        if( $count >0 ) {
+            $total_pages = ceil($count/$limitnum);
+        }
+        $total_pages = 0;
+        if( $count >0 ) {
+            $total_pages = ceil($count/$limitnum);
+        }
+        $responce["page"] = $pagenum;
+        $responce["total"] = $total_pages;
+        $responce["records"] = $count;
+
+        $i=0;
+        foreach($list as $item){
+            $responce["rows"][$i]['id']=$item["id"];
+            $responce["rows"][$i]['cell'] = array($item['id'],
+                //$item['log_detail'],
+                $item['log_msg'],
+            );
+            $i++;
+        }
+        //trace($responce,"subgrid");
+        $this->ajaxReturn($responce);
+    }
+    //
     public function ajaxLogSearchSave(){
         $Data = M('log'); // 实例化Data数据模型
 

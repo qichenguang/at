@@ -76,13 +76,46 @@ $(document).ready(function(){
             editurl: save_url,
             caption:caption_str,
             onSelectRow: function(id){
-			}
-			,
+			},
             onCellSelect: function(rowid,iCol,cellcontent,e){
                 //alert("cellselect" + cellcontent);
             },
             afterInsertRow:function(rowid,rowdata,rowelem){
                 //alert(rowid);
+            },
+            subGrid: false,
+            // define the icons in subgrid
+            subGridOptions: {
+                "plusicon"  : "ui-icon-triangle-1-e",
+                "minusicon" : "ui-icon-triangle-1-s",
+                "openicon"  : "ui-icon-arrowreturn-1-e"
+                //expand all rows on load
+                //,"expandOnLoad" : true
+                // load the subgrid data only once
+                // and the just show/hide
+                ,"reloadOnExpand" : true
+                // select the row when the expand column is clicked
+                ,"selectOnExpand" : true
+            },
+            subGridRowExpanded: function(subgrid_id, row_id) {
+                var subgrid_table_id, pager_id;
+                subgrid_table_id = subgrid_id+"_t";
+                pager_id = "p_"+subgrid_table_id;
+                $("#"+subgrid_id).html("<table id='"+subgrid_table_id+"' class='scroll'></table><div id='"+pager_id+"' class='scroll'></div>");
+                jQuery("#"+subgrid_table_id).jqGrid({
+                    url:"/index.php/Home/Log/ajaxLogSearchDetail",
+                    datatype: "json",
+                    mtype: 'POST',
+                    postData: {id:row_id},
+                    colNames: ['MsgId','详细信息'],
+                    colModel: [
+                        {name:"MsgId",index:"MsgId",align:"right",key:true,width:50},
+                        {name:"log_detail",index:"log_detail",width:600}
+                    ],
+                    rowNum:20,
+                    pager: pager_id,
+                    height: '100%'
+                });
             }
         });
         //导航栏配置和CRUD函数
