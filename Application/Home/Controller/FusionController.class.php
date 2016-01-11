@@ -208,7 +208,7 @@ class FusionController extends Controller {
         $responce['categories'] = $categories;
         $responce['dataset'] = $dataset;
         $responce['vtrendlines'] = $vtrendlines;
-        $responce['caption'] = "统计 -- [快线   " . $fast_data[count($fast_data) - 1]['tooltext'] . "]  [慢线   " . $slow_data[count($slow_data) - 1]['tooltext'] . "]";
+        $responce['caption'] = "统计 -- [快线   " . $fast_data[count($fast_data) - 1]['tooltext'] . "   ]  [慢线   " . $slow_data[count($slow_data) - 1]['tooltext'] . "   ]";
         //trace($responce);
         $this->ajaxReturn($responce);
     }
