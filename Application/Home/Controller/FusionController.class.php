@@ -100,11 +100,11 @@ class FusionController extends Controller {
                     //$fast_num_array[] = $info[1] - $init_nums["fast_num"];
                     $fast_percent_num_array[] = round(($info[1] / $init_nums["fast_num"])*100) - 100;
                     //$fast_tooltext_array[] = (intval(($info[1] - $init_nums["fast_num"]) / 10)*10) . "," . (round(($info[1] / $init_nums["fast_num"])*100)) . "%"  ;
-                    $fast_tooltext_array[] = (intval(($info[1]) / 10)*10) . "  ,  " . (round((1 - $info[1] / $init_nums["fast_num"])*100)) . "%"  ;
+                    $fast_tooltext_array[] = (intval(($info[1]) / 10)*10) . "  ,  " . (round(($info[1] / $init_nums["fast_num"] - 1)*100)) . "%"  ;
                     //$slow_num_array[] = ($info[2] - $init_nums["slow_num"]);
                     $slow_percent_num_array[] = round(($info[2] / $init_nums["slow_num"])*100) - 100;
                     //$slow_tooltext_array[] = (intval(($info[2] - $init_nums["slow_num"]) / 10)*10) . "," . (round(($info[2] / $init_nums["slow_num"])*100)) . "%"  ;
-                    $slow_tooltext_array[] = (intval(($info[2]) / 10)*10) . "  ,  " . (round((1 - $info[2] / $init_nums["slow_num"])*100)) . "%"  ;
+                    $slow_tooltext_array[] = (intval(($info[2]) / 10)*10) . "  ,  " . (round(($info[2] / $init_nums["slow_num"] - 1)*100)) . "%"  ;
                     //$fast_num_array[] = $info[1] - $init_nums["slow_num"];
                     //$slow_num_array[] = $info[2] - $init_nums["slow_num"];
                 }
